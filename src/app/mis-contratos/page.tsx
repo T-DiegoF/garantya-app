@@ -10,6 +10,7 @@ import { FACTORY_ADDRESS, GARANTYA_FACTORY_ABI, GARANTYA_ABI, ContractState } fr
 import { shortenAddress } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useT } from "@/contexts/LanguageContext";
 
 function AlertBanner({ contracts, targetState, title, description }: {
   contracts: Address[];
@@ -49,15 +50,6 @@ function AlertBanner({ contracts, targetState, title, description }: {
   );
 }
 
-const STATE_PILL: Record<number, { label: string; className: string }> = {
-  [ContractState.Created]:              { label: "Esperando depósito", className: "bg-stone-100 text-stone-500" },
-  [ContractState.Funded]:               { label: "Activo",             className: "bg-green-50 text-green-700" },
-  [ContractState.DistributionProposed]: { label: "Propuesta enviada",  className: "bg-amber-50 text-amber-700" },
-  [ContractState.Disputed]:             { label: "En disputa",         className: "bg-red-50 text-red-700" },
-  [ContractState.Completed]:            { label: "Completado",         className: "bg-stone-100 text-stone-400" },
-  [ContractState.Cancelled]:            { label: "Cancelado",          className: "bg-stone-100 text-stone-400" },
-};
-
 function HighlightedAddress({ address, query }: { address: string; query: string }) {
   if (!query) return <span>{address}</span>;
   const lower = address.toLowerCase();
@@ -74,8 +66,9 @@ function HighlightedAddress({ address, query }: { address: string; query: string
   );
 }
 
-function ContractItem({ address, state, index, highlight, daysLeft }: { address: Address; state: number | undefined; index: number; highlight?: string; daysLeft?: number }) {
-  const pill = state !== undefined ? STATE_PILL[state] : undefined;
+function ContractItem({ address, state, index, highlight, daysLeft, statePill }: { address: Address; state: number | undefined; index: number; highlight?: string; daysLeft?: number; statePill: Record<number, { label: string; className: string }> }) {
+  const { t } = useT();
+  const pill = state !== undefined ? statePill[state] : undefined;
   const isCompleted = state === ContractState.Completed;
   const showDays = state === ContractState.Funded && daysLeft !== undefined;
   const daysUrgent = daysLeft !== undefined && daysLeft <= 30;
@@ -100,7 +93,7 @@ function ContractItem({ address, state, index, highlight, daysLeft }: { address:
           <div className="flex items-center gap-2 flex-shrink-0">
             {showDays && (
               <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${daysUrgent ? "bg-red-50 text-red-600" : "bg-stone-100 text-stone-400"}`}>
-                {daysLeft === 0 ? "Vencido" : `${daysLeft}d`}
+                {daysLeft === 0 ? t.contracts.expired : `${daysLeft}d`}
               </span>
             )}
             {pill && (
@@ -121,10 +114,20 @@ export default function MisContratosPage() {
   const router = useRouter();
   const [searchAddress, setSearchAddress] = useState("");
   const [searchError,   setSearchError]   = useState("");
+  const { t } = useT();
+
+  const STATE_PILL: Record<number, { label: string; className: string }> = {
+    [ContractState.Created]:              { label: t.contracts.states.created,   className: "bg-stone-100 text-stone-500" },
+    [ContractState.Funded]:               { label: t.contracts.states.funded,    className: "bg-green-50 text-green-700" },
+    [ContractState.DistributionProposed]: { label: t.contracts.states.proposed,  className: "bg-amber-50 text-amber-700" },
+    [ContractState.Disputed]:             { label: t.contracts.states.disputed,  className: "bg-red-50 text-red-700" },
+    [ContractState.Completed]:            { label: t.contracts.states.completed, className: "bg-stone-100 text-stone-400" },
+    [ContractState.Cancelled]:            { label: t.contracts.states.cancelled, className: "bg-stone-100 text-stone-400" },
+  };
 
   function handleSearch() {
     const addr = searchAddress.trim();
-    if (!isAddress(addr)) { setSearchError("Dirección inválida"); return; }
+    if (!isAddress(addr)) { setSearchError(t.common.invalidAddress); return; }
     router.push(`/contrato/${addr}`);
   }
 
@@ -158,7 +161,7 @@ export default function MisContratosPage() {
       abi: GARANTYA_ABI,
       functionName: "state" as const,
     })),
-    query: { enabled: allContracts.length > 0 },
+    query: { enabled: allContracts.length > 0, staleTime: 10_000, gcTime: 60_000 },
   });
 
   const { data: deadlinesData } = useReadContracts({
@@ -167,10 +170,29 @@ export default function MisContratosPage() {
       abi: GARANTYA_ABI,
       functionName: "contractDeadline" as const,
     })),
-    query: { enabled: allContracts.length > 0 },
+    query: { enabled: allContracts.length > 0, staleTime: 60_000, gcTime: 5 * 60_000 },
   });
 
   const hasContracts = tenantContracts.length > 0 || landlordContracts.length > 0;
+
+  // O(1) lookup maps — rebuilt only when contract list or chain data changes
+  const stateMap = useMemo(() => {
+    const map = new Map<Address, number>();
+    allContracts.forEach((addr, i) => {
+      const raw = statesData?.[i]?.result;
+      if (raw !== undefined && raw !== null) map.set(addr, Number(raw));
+    });
+    return map;
+  }, [allContracts, statesData]);
+
+  const deadlineMap = useMemo(() => {
+    const map = new Map<Address, number>();
+    allContracts.forEach((addr, i) => {
+      const raw = deadlinesData?.[i]?.result;
+      if (raw) map.set(addr, Number(raw));
+    });
+    return map;
+  }, [allContracts, deadlinesData]);
 
   const query = searchAddress.trim().toLowerCase();
   const filteredLandlord = query
@@ -182,26 +204,20 @@ export default function MisContratosPage() {
   const hasResults = filteredLandlord.length > 0 || filteredTenant.length > 0;
 
   function getState(addr: Address): number | undefined {
-    const idx = allContracts.indexOf(addr);
-    if (idx < 0) return undefined;
-    const raw = statesData?.[idx]?.result;
-    if (raw === undefined || raw === null) return undefined;
-    return Number(raw);
+    return stateMap.get(addr);
   }
 
   function getDaysLeft(addr: Address): number | undefined {
-    const idx = allContracts.indexOf(addr);
-    if (idx < 0) return undefined;
-    const raw = deadlinesData?.[idx]?.result;
-    if (!raw) return undefined;
-    const diff = Math.floor((Number(raw) * 1000 - Date.now()) / 86_400_000);
+    const deadline = deadlineMap.get(addr);
+    if (!deadline) return undefined;
+    const diff = Math.floor((deadline * 1000 - Date.now()) / 86_400_000);
     return diff > 0 ? diff : 0;
   }
 
   if (!isConnected) {
     return (
       <div className="flex flex-col items-center justify-center gap-6 py-24 animate-fade-up">
-        <p className="text-stone-400 text-sm">Conectá tu wallet para ver tus contratos</p>
+        <p className="text-stone-400 text-sm">{t.contracts.connectPrompt}</p>
         <ConnectButton />
       </div>
     );
@@ -215,8 +231,8 @@ export default function MisContratosPage() {
         <AlertBanner
           contracts={tenantContracts}
           targetState={ContractState.Created}
-          title={n => n === 1 ? "Tenés un depósito pendiente" : `Tenés ${n} depósitos pendientes`}
-          description="Tu propietario creó un contrato esperando tu garantía. Tocá para depositar."
+          title={n => n === 1 ? t.contracts.alerts.tenantPending1 : t.contracts.alerts.tenantPendingN(n)}
+          description={t.contracts.alerts.tenantDesc}
         />
       )}
 
@@ -225,46 +241,46 @@ export default function MisContratosPage() {
         <AlertBanner
           contracts={landlordContracts}
           targetState={ContractState.Funded}
-          title={n => n === 1 ? "Tu inquilino depositó la garantía" : `${n} inquilinos depositaron su garantía`}
-          description="El depósito está bloqueado. Cuando finalice el contrato, proponé la distribución."
+          title={n => n === 1 ? t.contracts.alerts.landlordFunded1 : t.contracts.alerts.landlordFundedN(n)}
+          description={t.contracts.alerts.landlordDesc}
         />
       )}
 
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
-          <p className="screen-tag">mis contratos</p>
-          <h1 className="text-3xl font-black tracking-tight leading-none">Contratos</h1>
+          <p className="screen-tag">{t.contracts.tag}</p>
+          <h1 className="text-3xl font-black tracking-tight leading-none">{t.contracts.title}</h1>
         </div>
         <Link href="/">
-          <Button variant="outline" className="text-sm">+ Nuevo</Button>
+          <Button variant="outline" className="text-sm">{t.contracts.newButton}</Button>
         </Link>
       </div>
 
       {/* Search */}
       <div className="card space-y-3">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">Buscar contrato</p>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">{t.contracts.searchLabel}</p>
         <div className="flex gap-2">
           <div className="flex-1">
             <Input
-              placeholder="0x..."
+              placeholder={t.contracts.searchPlaceholder}
               value={searchAddress}
               onChange={e => { setSearchAddress(e.target.value); setSearchError(""); }}
               error={searchError}
               mono
             />
           </div>
-          <Button onClick={handleSearch}>Ir →</Button>
+          <Button onClick={handleSearch}>{t.contracts.searchButton}</Button>
         </div>
         {query && !hasResults && (
           <p className="text-xs text-stone-400">
-            Sin coincidencias.{" "}
+            {t.contracts.noResults}{" "}
             {isAddress(searchAddress.trim()) && (
               <button
                 className="underline underline-offset-2 hover:text-stone-600 transition-colors"
                 onClick={handleSearch}
               >
-                Ir a ese contrato →
+                {t.contracts.goToContract}
               </button>
             )}
           </p>
@@ -281,11 +297,11 @@ export default function MisContratosPage() {
             </svg>
           </div>
           <div className="text-center space-y-1">
-            <p className="font-bold text-stone-700">Sin contratos aún</p>
-            <p className="text-sm text-stone-400">Creá uno como propietario o pedile la dirección a tu propietario.</p>
+            <p className="font-bold text-stone-700">{t.contracts.emptyTitle}</p>
+            <p className="text-sm text-stone-400">{t.contracts.emptyDesc}</p>
           </div>
           <Link href="/">
-            <Button>Crear contrato →</Button>
+            <Button>{t.contracts.createButton}</Button>
           </Link>
         </div>
       )}
@@ -294,11 +310,11 @@ export default function MisContratosPage() {
       {filteredLandlord.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">Propietario</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">{t.contracts.sectionLandlord}</p>
             <span className="text-[11px] font-bold text-stone-300">{filteredLandlord.length}</span>
           </div>
           {filteredLandlord.map((addr, i) => (
-            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} />
+            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} statePill={STATE_PILL} />
           ))}
         </div>
       )}
@@ -307,11 +323,11 @@ export default function MisContratosPage() {
       {filteredTenant.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">Inquilino</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">{t.contracts.sectionTenant}</p>
             <span className="text-[11px] font-bold text-stone-300">{filteredTenant.length}</span>
           </div>
           {filteredTenant.map((addr, i) => (
-            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} />
+            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} statePill={STATE_PILL} />
           ))}
         </div>
       )}

@@ -3,17 +3,23 @@
 import { useState } from "react";
 import { useWriteContract } from "wagmi";
 import { parseEther, type Address } from "viem";
-import { QRCodeSVG } from "qrcode.react";
+import dynamic from "next/dynamic";
+
+const QRCodeSVG = dynamic(
+  () => import("qrcode.react").then(m => ({ default: m.QRCodeSVG })),
+  { ssr: false, loading: () => <div className="w-[140px] h-[140px] rounded-xl bg-stone-100 animate-pulse" /> }
+);
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { DataRow } from "@/components/DataRow";
 import { GARANTYA_ABI, ContractState } from "@/lib/contract";
 import {
-  formatAVAX, shortenAddress, getStateLabel,
+  formatAVAX, shortenAddress,
   getStateBadge, snowtraceUrl,
 } from "@/lib/utils";
 import type { useEscrow } from "@/lib/hooks/useEscrow";
+import { useT } from "@/contexts/LanguageContext";
 
 type EscrowData = ReturnType<typeof useEscrow>;
 
@@ -28,6 +34,12 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
     deadline, proposal, allocations, refetch,
   } = escrow;
 
+  const { t } = useT();
+  const stateLabels = [
+    t.contracts.states.created, t.contracts.states.funded,
+    t.contracts.states.proposed, t.contracts.states.disputed,
+    t.contracts.states.completed, t.contracts.states.cancelled,
+  ];
   const { writeContractAsync, isPending } = useWriteContract();
   const [action,         setAction]         = useState<string | null>(null);
   const [error,          setError]          = useState<string | null>(null);
@@ -48,7 +60,7 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       await refetch();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error";
-      setError(msg.includes("rejected") ? "Transacción rechazada" : "Error al ejecutar");
+      setError(msg.includes("rejected") ? t.common.rejected : t.common.execError);
     } finally {
       setAction(null);
     }
@@ -58,10 +70,10 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
     if (!deposit) return false;
     const e: Record<string, string> = {};
     let ta: bigint, la: bigint;
-    try { ta = parseEther(tenantShare);   } catch { e.tenant   = "Valor inválido"; ta = 0n; }
-    try { la = parseEther(landlordShare); } catch { e.landlord = "Valor inválido"; la = 0n; }
+    try { ta = parseEther(tenantShare);   } catch { e.tenant   = t.landlord.errors.invalidValue; ta = 0n; }
+    try { la = parseEther(landlordShare); } catch { e.landlord = t.landlord.errors.invalidValue; la = 0n; }
     if (!e.tenant && !e.landlord && ta + la !== deposit)
-      e.tenant = `La suma debe ser ${formatAVAX(deposit)} AVAX`;
+      e.tenant = t.landlord.errors.sumMustBe(formatAVAX(deposit));
     setProposeErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -91,15 +103,15 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-start justify-between">
-          <p className="screen-tag">vista propietario</p>
+          <p className="screen-tag">{t.landlord.tag}</p>
           {state !== undefined && (
             <Badge variant={getStateBadge(state)} pulse={state < ContractState.Completed}>
-              {getStateLabel(state)}
+              {stateLabels[state] ?? ""}
             </Badge>
           )}
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-stone-400">Depósito en escrow</h1>
+          <h1 className="text-xl font-bold tracking-tight text-stone-400">{t.landlord.escrowTitle}</h1>
           {deposit ? (
             <div className="flex items-baseline gap-2 mt-1">
               <span className="amount-hero">{formatAVAX(deposit)}</span>
@@ -115,16 +127,16 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
 
       {/* Info */}
       <div className="card space-y-0">
-        <DataRow label="Inquilino"  value={shortenAddress(tenant!)}    mono />
-        <DataRow label="Árbitro"    value={shortenAddress(arbitrator!)} mono />
+        <DataRow label={t.common.tenant}    value={shortenAddress(tenant!)}    mono />
+        <DataRow label={t.common.arbitrator} value={shortenAddress(arbitrator!)} mono />
         {deadline && (
           <DataRow
-            label="Vence el"
+            label={t.common.expiresOn}
             value={new Date(Number(deadline) * 1000).toLocaleDateString("es-AR")}
           />
         )}
         <DataRow
-          label="Ver en Snowtrace"
+          label={t.common.viewOnChain}
           value={
             <a href={snowtraceUrl(address)} target="_blank" rel="noopener noreferrer"
                className="underline underline-offset-2 hover:text-[#A07850]">
@@ -139,18 +151,14 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       {state === ContractState.Created && (() => {
         const origin = globalThis.window?.location.origin ?? "";
         const shareUrl = `${origin}/contrato/${address}`;
-        const waText = encodeURIComponent(
-          `🔐 *Garantía de alquiler — GarantYa*\n\nTu propietario creó un contrato de garantía en blockchain.\n\n✅ Sin intermediarios\n✅ Fondos bloqueados hasta el fin del contrato\n✅ Árbitro independiente si hay disputa\n\nDepositá tu garantía aquí:\n${shareUrl}`
-        );
-        const tgText = encodeURIComponent(
-          "🔐 Garantía de alquiler — GarantYa\n\nTu propietario creó un contrato en blockchain.\n✅ Sin intermediarios · Fondos bloqueados · Árbitro independiente\n\nDepositá tu garantía:"
-        );
+        const waText = encodeURIComponent(t.landlord.waMessage(shareUrl));
+        const tgText = encodeURIComponent(t.landlord.tgMessage);
         return (
           <div className="card space-y-4 bg-amber-50 border-amber-200">
             <div>
-              <p className="text-sm font-bold text-amber-800">Esperando depósito del inquilino</p>
+              <p className="text-sm font-bold text-amber-800">{t.landlord.waitingTitle}</p>
               <p className="text-xs text-amber-700 leading-relaxed mt-1">
-                Compartí este QR o el link con tu inquilino para que deposite la garantía.
+                {t.landlord.waitingDesc}
               </p>
             </div>
             <div className="flex justify-center">
@@ -183,7 +191,7 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
               className="w-full text-xs text-amber-600 underline underline-offset-2 hover:text-amber-800 transition-colors py-1"
               onClick={() => navigator.clipboard.writeText(shareUrl)}
             >
-              Copiar link
+              {t.landlord.copyLink}
             </button>
           </div>
         );
@@ -192,12 +200,12 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       {/* State: Funded — propose */}
       {state === ContractState.Funded && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-black">Proponer distribución</h2>
+          <h2 className="text-lg font-black">{t.landlord.proposeTitle}</h2>
           <p className="text-sm text-stone-400">
-            Solo podés proponer una vez. El inquilino tiene 7 días para responder.
+            {t.landlord.proposeDesc}
           </p>
           <Input
-            label="Para el inquilino (AVAX)"
+            label={t.landlord.forTenant}
             type="number"
             placeholder="0.000"
             value={tenantShare}
@@ -206,7 +214,7 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
             step="0.0001"
           />
           <Input
-            label="Para mí (AVAX)"
+            label={t.landlord.forMe}
             type="number"
             placeholder="0.000"
             value={landlordShare}
@@ -216,11 +224,11 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
           />
           {deposit && (
             <p className="text-xs text-stone-400">
-              Total disponible: {formatAVAX(deposit)} AVAX
+              {t.landlord.totalAvail(formatAVAX(deposit))}
             </p>
           )}
           <Button fullWidth loading={isLoading("proposeDistribution")} onClick={handlePropose}>
-            Proponer distribución →
+            {t.landlord.proposeButton}
           </Button>
         </div>
       )}
@@ -228,27 +236,27 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       {/* State: DistributionProposed */}
       {state === ContractState.DistributionProposed && proposal && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-black">Propuesta enviada</h2>
+          <h2 className="text-lg font-black">{t.landlord.proposedTitle}</h2>
           <div className="space-y-0">
-            <DataRow label="Para el inquilino"  value={`${formatAVAX(proposal.tenantAmount)} AVAX`}   accent />
-            <DataRow label="Para mí"            value={`${formatAVAX(proposal.landlordAmount)} AVAX`} />
+            <DataRow label={t.landlord.propTenant}  value={`${formatAVAX(proposal.tenantAmount)} AVAX`}   accent />
+            <DataRow label={t.landlord.propMe}      value={`${formatAVAX(proposal.landlordAmount)} AVAX`} />
             <DataRow
-              label="Vence"
+              label={t.landlord.propExpires}
               value={new Date((Number(proposal.proposedAt) + 7 * 24 * 3600) * 1000).toLocaleDateString("es-AR")}
             />
           </div>
           <p className="text-sm text-stone-400">
-            Esperando respuesta del inquilino. Si no responde en 7 días, la propuesta se auto-acepta.
+            {t.landlord.waitingResponse}
           </p>
           <div className="pt-2 border-t border-[#E0D9CE]">
-            <p className="text-xs text-stone-400 mb-2">Si el plazo ya venció:</p>
+            <p className="text-xs text-stone-400 mb-2">{t.landlord.timeoutLabel}</p>
             <Button
               fullWidth
               variant="outline"
               loading={isLoading("executeTimeout")}
               onClick={() => call("executeTimeout")}
             >
-              Ejecutar timeout
+              {t.landlord.executeTimeout}
             </Button>
           </div>
         </div>
@@ -257,10 +265,9 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       {/* State: Disputed */}
       {state === ContractState.Disputed && (
         <div className="card space-y-4">
-          <Badge variant="red" pulse>En disputa</Badge>
+          <Badge variant="red" pulse>{t.arbitrator.disputedTitle}</Badge>
           <p className="text-sm text-stone-500 leading-relaxed">
-            El inquilino rechazó la propuesta. El árbitro debe resolver.
-            Si el árbitro no actúa en 30 días, el inquilino recupera el depósito completo.
+            {t.landlord.disputedDesc}
           </p>
         </div>
       )}
@@ -268,11 +275,11 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       {/* State: Completed */}
       {state === ContractState.Completed && allocations && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-black">Fondos disponibles</h2>
-          <DataRow label="Tu parte" value={`${formatAVAX(allocations.landlord)} AVAX`} accent />
+          <h2 className="text-lg font-black">{t.landlord.completedTitle}</h2>
+          <DataRow label={t.landlord.yourPart} value={`${formatAVAX(allocations.landlord)} AVAX`} accent />
           {allocations.landlord > 0n && (
             <Button fullWidth loading={isLoading("withdraw")} onClick={() => call("withdraw")}>
-              Retirar {formatAVAX(allocations.landlord)} AVAX →
+              {t.landlord.withdrawButton(formatAVAX(allocations.landlord))}
             </Button>
           )}
         </div>

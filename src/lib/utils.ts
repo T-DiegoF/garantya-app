@@ -2,7 +2,7 @@ import { formatEther, type Address } from "viem";
 import { type UserRole, ContractState } from "./contract";
 
 export function formatAVAX(wei: bigint, decimals = 4): string {
-  return parseFloat(formatEther(wei)).toFixed(decimals);
+  return Number.parseFloat(formatEther(wei)).toFixed(decimals);
 }
 
 export function shortenAddress(address: Address): string {
@@ -21,18 +21,6 @@ export function getUserRole(
   if (addr === landlord.toLowerCase())   return "landlord";
   if (addr === arbitrator.toLowerCase()) return "arbitrator";
   return "unknown";
-}
-
-export function getStateLabel(state: number): string {
-  const labels: Record<number, string> = {
-    [ContractState.Created]:              "Esperando depósito",
-    [ContractState.Funded]:               "Activo",
-    [ContractState.DistributionProposed]: "Propuesta pendiente",
-    [ContractState.Disputed]:             "En disputa",
-    [ContractState.Completed]:            "Completado",
-    [ContractState.Cancelled]:            "Cancelado",
-  };
-  return labels[state] ?? "Desconocido";
 }
 
 export type BadgeVariant = "green" | "amber" | "red" | "blue" | "gray";

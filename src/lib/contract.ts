@@ -3,6 +3,13 @@ import { type Address } from "viem";
 export const FACTORY_ADDRESS =
   (process.env.NEXT_PUBLIC_FACTORY_ADDRESS as Address) ?? "0x0";
 
+// First block to scan for contract events.
+// Set NEXT_PUBLIC_FACTORY_DEPLOY_BLOCK in .env to the block number when the
+// factory was deployed. Avoids scanning from genesis (which crashes on mainnet).
+export const FACTORY_DEPLOY_BLOCK = BigInt(
+  process.env.NEXT_PUBLIC_FACTORY_DEPLOY_BLOCK ?? "0"
+);
+
 export const GARANTYA_FACTORY_ABI = [
   {
     name: "deployContract",

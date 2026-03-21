@@ -11,6 +11,7 @@ import { Countdown } from "@/components/Countdown";
 import { GARANTYA_ABI, ContractState } from "@/lib/contract";
 import { formatAVAX, shortenAddress, snowtraceUrl } from "@/lib/utils";
 import type { useEscrow } from "@/lib/hooks/useEscrow";
+import { useT } from "@/contexts/LanguageContext";
 
 type EscrowData = ReturnType<typeof useEscrow>;
 
@@ -22,6 +23,7 @@ interface ArbitratorViewProps {
 export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
   const { tenant, landlord, state, deposit, proposal, refetch } = escrow;
 
+  const { t } = useT();
   const { writeContractAsync, isPending } = useWriteContract();
   const [tenantShare,   setTenantShare]   = useState("");
   const [landlordShare, setLandlordShare] = useState("");
@@ -42,7 +44,7 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
       await refetch();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error";
-      setError(msg.includes("rejected") ? "Transacción rechazada" : "Error al ejecutar");
+      setError(msg.includes("rejected") ? t.common.rejected : t.common.execError);
     } finally {
       setAction(null);
     }
@@ -52,10 +54,10 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
     if (!deposit) return false;
     const e: Record<string, string> = {};
     let ta: bigint, la: bigint;
-    try { ta = parseEther(tenantShare);   } catch { e.tenant   = "Valor inválido"; ta = 0n; }
-    try { la = parseEther(landlordShare); } catch { e.landlord = "Valor inválido"; la = 0n; }
+    try { ta = parseEther(tenantShare);   } catch { e.tenant   = t.arbitrator.errors.invalidValue; ta = 0n; }
+    try { la = parseEther(landlordShare); } catch { e.landlord = t.arbitrator.errors.invalidValue; la = 0n; }
     if (!e.tenant && !e.landlord && ta + la !== deposit)
-      e.tenant = `La suma debe ser ${formatAVAX(deposit)} AVAX`;
+      e.tenant = t.arbitrator.errors.sumMustBe(formatAVAX(deposit));
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -83,22 +85,22 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
   if (state !== ContractState.Disputed) {
     return (
       <div className="space-y-5 animate-fade-up">
-        <p className="screen-tag">vista árbitro</p>
+        <p className="screen-tag">{t.arbitrator.tag}</p>
         <div className="card text-center py-8">
-          <Badge variant="green">Sin disputa activa</Badge>
+          <Badge variant="green">{t.arbitrator.noDispute}</Badge>
           <p className="text-sm text-stone-400 mt-3">
-            El contrato no está en estado de disputa. No se requiere intervención.
+            {t.arbitrator.noDisputeDesc}
           </p>
           <div className="divider" />
-          <DataRow label="Inquilino"   value={shortenAddress(tenant!)}   mono />
-          <DataRow label="Propietario" value={shortenAddress(landlord!)} mono />
+          <DataRow label={t.common.tenant}   value={shortenAddress(tenant!)}   mono />
+          <DataRow label={t.common.landlord} value={shortenAddress(landlord!)} mono />
           <a
             href={snowtraceUrl(address)}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-stone-400 underline underline-offset-2 mt-3 inline-block"
           >
-            Ver contrato en Snowtrace →
+            {t.common.viewOnChain} →
           </a>
         </div>
       </div>
@@ -108,9 +110,9 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
   return (
     <div className="space-y-5 animate-fade-up">
       <div className="space-y-3">
-        <p className="screen-tag">vista árbitro</p>
+        <p className="screen-tag">{t.arbitrator.tag}</p>
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-stone-400">En disputa</h1>
+          <h1 className="text-xl font-bold tracking-tight text-stone-400">{t.arbitrator.disputedTitle}</h1>
           {deposit && (
             <div className="flex items-baseline gap-2 mt-1">
               <span className="amount-hero">{formatAVAX(deposit)}</span>
@@ -121,16 +123,16 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
       </div>
 
       <div className="card space-y-0">
-        <DataRow label="Inquilino"   value={shortenAddress(tenant!)}   mono />
-        <DataRow label="Propietario" value={shortenAddress(landlord!)} mono />
+        <DataRow label={t.common.tenant}   value={shortenAddress(tenant!)}   mono />
+        <DataRow label={t.common.landlord} value={shortenAddress(landlord!)} mono />
         {proposal && (
           <>
             <DataRow
-              label="Propuesta original (inquilino)"
+              label={t.arbitrator.originalProposalTenant}
               value={`${formatAVAX(proposal.tenantAmount)} AVAX`}
             />
             <DataRow
-              label="Propuesta original (propietario)"
+              label={t.arbitrator.originalProposalLandlord}
               value={`${formatAVAX(proposal.landlordAmount)} AVAX`}
             />
           </>
@@ -140,7 +142,7 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
       {proposal && (
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-stone-400 mb-2">
-            Tu ventana de resolución
+            {t.arbitrator.resolutionWindow}
           </p>
           <Countdown
             deadline={proposal.disputedAt + BigInt(30 * 24 * 3600)}
@@ -150,12 +152,12 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
       )}
 
       <div className="card space-y-4">
-        <h2 className="text-lg font-black">Resolución final</h2>
+        <h2 className="text-lg font-black">{t.arbitrator.resolutionTitle}</h2>
         <p className="text-sm text-stone-400">
-          Tu decisión es vinculante e irreversible. El contrato ejecuta la distribución automáticamente.
+          {t.arbitrator.resolutionDesc}
         </p>
         <Input
-          label="Para el inquilino (AVAX)"
+          label={t.arbitrator.forTenant}
           type="number"
           placeholder="0.000"
           value={tenantShare}
@@ -164,7 +166,7 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
           step="0.0001"
         />
         <Input
-          label="Para el propietario (AVAX)"
+          label={t.arbitrator.forLandlord}
           type="number"
           placeholder="0.000"
           value={landlordShare}
@@ -174,11 +176,11 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
         />
         {deposit && (
           <p className="text-xs text-stone-400">
-            Total a distribuir: {formatAVAX(deposit)} AVAX
+            {t.arbitrator.totalDistribute(formatAVAX(deposit))}
           </p>
         )}
         <Button fullWidth loading={isLoading("resolve")} onClick={handleResolve}>
-          Emitir resolución →
+          {t.arbitrator.resolveButton}
         </Button>
       </div>
 

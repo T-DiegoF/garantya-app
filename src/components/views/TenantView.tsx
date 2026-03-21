@@ -10,10 +10,11 @@ import { Countdown } from "@/components/Countdown";
 import { SplitBar } from "@/components/SplitBar";
 import { GARANTYA_ABI, ContractState } from "@/lib/contract";
 import {
-  formatAVAX, shortenAddress, getStateLabel,
+  formatAVAX, shortenAddress,
   getStateBadge, snowtraceUrl,
 } from "@/lib/utils";
 import type { useEscrow } from "@/lib/hooks/useEscrow";
+import { useT } from "@/contexts/LanguageContext";
 
 type EscrowData = ReturnType<typeof useEscrow>;
 
@@ -29,6 +30,12 @@ export function TenantView({ address, escrow }: TenantViewProps) {
     allocations, refetch,
   } = escrow;
 
+  const { t } = useT();
+  const stateLabels = [
+    t.contracts.states.created, t.contracts.states.funded,
+    t.contracts.states.proposed, t.contracts.states.disputed,
+    t.contracts.states.completed, t.contracts.states.cancelled,
+  ];
   const { writeContractAsync, isPending } = useWriteContract();
   const [action, setAction] = useState<string | null>(null);
   const [error,  setError]  = useState<string | null>(null);
@@ -46,7 +53,7 @@ export function TenantView({ address, escrow }: TenantViewProps) {
       await refetch();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error";
-      setError(msg.includes("rejected") ? "Transacción rechazada" : "Error al ejecutar");
+      setError(msg.includes("rejected") ? t.common.rejected : t.common.execError);
     } finally {
       setAction(null);
     }
@@ -59,15 +66,15 @@ export function TenantView({ address, escrow }: TenantViewProps) {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-start justify-between">
-          <p className="screen-tag">vista inquilino</p>
+          <p className="screen-tag">{t.tenant.tag}</p>
           {state !== undefined && (
             <Badge variant={getStateBadge(state)} pulse={state < ContractState.Completed}>
-              {getStateLabel(state)}
+              {stateLabels[state] ?? ""}
             </Badge>
           )}
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-stone-400">Tu depósito</h1>
+          <h1 className="text-xl font-bold tracking-tight text-stone-400">{t.tenant.depositTitle}</h1>
           {deposit ? (
             <div className="flex items-baseline gap-2 mt-1">
               <span className="amount-hero">{formatAVAX(deposit)}</span>
@@ -84,16 +91,16 @@ export function TenantView({ address, escrow }: TenantViewProps) {
 
       {/* Info */}
       <div className="card space-y-0">
-        <DataRow label="Propietario"  value={shortenAddress(landlord!)}  mono />
-        <DataRow label="Árbitro"      value={shortenAddress(arbitrator!)} mono />
+        <DataRow label={t.common.landlord}   value={shortenAddress(landlord!)}  mono />
+        <DataRow label={t.common.arbitrator} value={shortenAddress(arbitrator!)} mono />
         {deadline && (
           <DataRow
-            label="Vence el"
+            label={t.common.expiresOn}
             value={new Date(Number(deadline) * 1000).toLocaleDateString("es-AR")}
           />
         )}
         <DataRow
-          label="Ver en Snowtrace"
+          label={t.common.viewOnChain}
           value={
             <a href={snowtraceUrl(address)} target="_blank" rel="noopener noreferrer"
                className="underline underline-offset-2 hover:text-[#A07850]">
@@ -107,11 +114,9 @@ export function TenantView({ address, escrow }: TenantViewProps) {
       {/* State: Created — fund */}
       {state === ContractState.Created && expectedDeposit && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-black">Depositar garantía</h2>
+          <h2 className="text-lg font-black">{t.tenant.fundTitle}</h2>
           <p className="text-sm text-stone-400">
-            El propietario creó el contrato. Depositá exactamente{" "}
-            <span className="font-bold text-[#1C1917]">{formatAVAX(expectedDeposit)} AVAX</span>{" "}
-            para activarlo.
+            {t.tenant.fundDesc(formatAVAX(expectedDeposit))}
           </p>
           <Button
             fullWidth
@@ -123,10 +128,10 @@ export function TenantView({ address, escrow }: TenantViewProps) {
               value: expectedDeposit,
             }).then(() => refetch()).catch((err: unknown) => {
               const msg = err instanceof Error ? err.message : "Error";
-              setError(msg.includes("rejected") ? "Transacción rechazada" : "Error al depositar");
+              setError(msg.includes("rejected") ? t.common.rejected : t.common.execError);
             })}
           >
-            Depositar {formatAVAX(expectedDeposit)} AVAX →
+            {t.tenant.fundButton(formatAVAX(expectedDeposit))}
           </Button>
         </div>
       )}
@@ -136,11 +141,10 @@ export function TenantView({ address, escrow }: TenantViewProps) {
         <div className="card space-y-4">
           <div className="flex items-start gap-3">
             <div className="mt-0.5 h-2 w-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
-            <p className="text-sm font-bold text-stone-700">Depósito bloqueado — esperando propuesta</p>
+            <p className="text-sm font-bold text-stone-700">{t.tenant.fundedStatus}</p>
           </div>
           <p className="text-sm text-stone-500 leading-relaxed">
-            El propietario debe proponer cómo distribuir el depósito al finalizar el contrato.
-            Podés cancelar dentro de las primeras 24hs si cambiás de opinión.
+            {t.tenant.fundedDesc}
           </p>
           <Button
             fullWidth
@@ -148,7 +152,7 @@ export function TenantView({ address, escrow }: TenantViewProps) {
             loading={isLoading("cancel")}
             onClick={() => call("cancel")}
           >
-            Cancelar contrato
+            {t.tenant.cancelButton}
           </Button>
           <Button
             fullWidth
@@ -156,7 +160,7 @@ export function TenantView({ address, escrow }: TenantViewProps) {
             loading={isLoading("reclaimExpired")}
             onClick={() => call("reclaimExpired")}
           >
-            Reclamar (si venció plazo)
+            {t.tenant.reclaimButton}
           </Button>
         </div>
       )}
@@ -164,23 +168,23 @@ export function TenantView({ address, escrow }: TenantViewProps) {
       {/* State: DistributionProposed */}
       {state === ContractState.DistributionProposed && proposal && (
         <div className="card space-y-5">
-          <h2 className="text-lg font-black tracking-tight">Propuesta recibida</h2>
+          <h2 className="text-lg font-black tracking-tight">{t.tenant.proposedTitle}</h2>
           <Countdown deadline={proposal.proposedAt + BigInt(7 * 24 * 3600)} />
           <SplitBar
             tenantAmount={proposal.tenantAmount}
             landlordAmount={proposal.landlordAmount}
           />
           <div className="space-y-0">
-            <DataRow label="Tu parte"     value={`${formatAVAX(proposal.tenantAmount)} AVAX`}   accent />
-            <DataRow label="Propietario"  value={`${formatAVAX(proposal.landlordAmount)} AVAX`} />
-            <DataRow label="Total"        value={`${formatAVAX(proposal.tenantAmount + proposal.landlordAmount)} AVAX`} />
+            <DataRow label={t.tenant.yourPart}     value={`${formatAVAX(proposal.tenantAmount)} AVAX`}   accent />
+            <DataRow label={t.tenant.propLandlord}  value={`${formatAVAX(proposal.landlordAmount)} AVAX`} />
+            <DataRow label={t.tenant.total}        value={`${formatAVAX(proposal.tenantAmount + proposal.landlordAmount)} AVAX`} />
           </div>
           <div className="divider" />
           <Button fullWidth variant="success" loading={isLoading("accept")} onClick={() => call("accept")}>
-            Aceptar y retirar →
+            {t.tenant.acceptButton}
           </Button>
           <Button fullWidth variant="outline" loading={isLoading("reject")} onClick={() => call("reject")}>
-            Rechazar y pedir árbitro
+            {t.tenant.rejectButton}
           </Button>
         </div>
       )}
@@ -188,9 +192,9 @@ export function TenantView({ address, escrow }: TenantViewProps) {
       {/* State: Disputed */}
       {state === ContractState.Disputed && proposal && (
         <div className="card space-y-4">
-          <Badge variant="red" pulse>En disputa</Badge>
+          <Badge variant="red" pulse>{t.arbitrator.disputedTitle}</Badge>
           <p className="text-sm text-stone-500 leading-relaxed">
-            El árbitro tiene 30 días para resolver. Si no actúa, podés reclamar el depósito completo.
+            {t.tenant.disputedDesc}
           </p>
           <Countdown
             deadline={proposal.disputedAt + BigInt(30 * 24 * 3600)}
@@ -202,7 +206,7 @@ export function TenantView({ address, escrow }: TenantViewProps) {
             loading={isLoading("executeArbitratorTimeout")}
             onClick={() => call("executeArbitratorTimeout")}
           >
-            Reclamar por inactividad del árbitro
+            {t.tenant.claimTimeout}
           </Button>
         </div>
       )}
@@ -210,11 +214,11 @@ export function TenantView({ address, escrow }: TenantViewProps) {
       {/* State: Completed */}
       {state === ContractState.Completed && allocations && (
         <div className="card space-y-4">
-          <h2 className="text-lg font-black">Fondos disponibles</h2>
-          <DataRow label="Tu parte" value={`${formatAVAX(allocations.tenant)} AVAX`} accent />
+          <h2 className="text-lg font-black">{t.tenant.completedTitle}</h2>
+          <DataRow label={t.tenant.yourPart} value={`${formatAVAX(allocations.tenant)} AVAX`} accent />
           {allocations.tenant > 0n && (
             <Button fullWidth loading={isLoading("withdraw")} onClick={() => call("withdraw")}>
-              Retirar {formatAVAX(allocations.tenant)} AVAX →
+              {t.tenant.withdrawButton(formatAVAX(allocations.tenant))}
             </Button>
           )}
         </div>

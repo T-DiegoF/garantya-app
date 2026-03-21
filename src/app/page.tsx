@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { FACTORY_ADDRESS, GARANTYA_FACTORY_ABI } from "@/lib/contract";
 import { snowtraceTxUrl } from "@/lib/utils";
+import { useT } from "@/contexts/LanguageContext";
 
 export default function HomePage() {
   const router  = useRouter();
   const { address, isConnected } = useAccount();
+  const { t } = useT();
 
   const [role,     setRole]     = useState<"landlord" | null>(null);
   const [landlord, setLandlord] = useState("");
@@ -40,15 +42,15 @@ export default function HomePage() {
   function validate(): boolean {
     const e: Record<string, string> = {};
     if (!landlord || !/^0x[a-fA-F0-9]{40}$/.test(landlord))
-      e.landlord = "Dirección inválida";
+      e.landlord = t.home.errors.invalidAddress;
     if (landlord.toLowerCase() === address?.toLowerCase())
-      e.landlord = "No puede ser tu propia wallet";
+      e.landlord = t.home.errors.ownWallet;
     const d = Number.parseInt(days);
     if (Number.isNaN(d) || d < 1 || d > 1095)
-      e.days = "Entre 1 y 1095 días";
+      e.days = t.home.errors.days;
     const a = Number.parseFloat(amount);
     if (Number.isNaN(a) || a < 0.01 || a > 100)
-      e.amount = "Entre 0.01 y 100 AVAX";
+      e.amount = t.home.errors.amount;
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -66,7 +68,7 @@ export default function HomePage() {
       setTimeout(() => router.push(`/mis-contratos`), 3000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error desconocido";
-      setErrors({ submit: msg.includes("rejected") ? "Transacción rechazada" : "Error al crear el contrato" });
+      setErrors({ submit: msg.includes("rejected") ? t.home.errors.rejected : t.home.errors.createFailed });
     }
   }
 
@@ -79,14 +81,14 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-[#E5DFD5] bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-stone-400"
             style={{ boxShadow: "0 1px 3px rgba(28,25,23,0.06)" }}>
             <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-            Avalanche · Testnet
+            {t.home.badge}
           </div>
           <h1 className="text-[52px] font-black tracking-[-0.03em] leading-[1.0]">
-            Tu garantía,<br />
-            <em className="text-[#A07850] not-italic">en código.</em>
+            {t.home.heroTitle.split("\n")[0]}<br />
+            <em className="text-[#A07850] not-italic">{t.home.heroTitle.split("\n")[1]}</em>
           </h1>
           <p className="text-stone-400 text-base leading-relaxed max-w-sm">
-            Depósito de alquiler bloqueado en blockchain. Nadie mueve los fondos solo.
+            {t.home.heroSubtitle}
           </p>
         </div>
 
@@ -100,8 +102,8 @@ export default function HomePage() {
               </svg>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">Propietario</p>
-              <p className="text-sm text-stone-600 leading-relaxed mt-0.5">Creá el contrato y fijá los términos.</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">{t.home.landlordCard.tag}</p>
+              <p className="text-sm text-stone-600 leading-relaxed mt-0.5">{t.home.landlordCard.desc}</p>
             </div>
           </div>
           <div className="card space-y-3">
@@ -112,16 +114,16 @@ export default function HomePage() {
               </svg>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">Inquilino</p>
-              <p className="text-sm text-stone-600 leading-relaxed mt-0.5">Depositá y recuperá tu garantía.</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">{t.home.tenantCard.tag}</p>
+              <p className="text-sm text-stone-600 leading-relaxed mt-0.5">{t.home.tenantCard.desc}</p>
             </div>
           </div>
         </div>
 
         {/* CTA */}
         <div className="space-y-3">
-          <ConnectButton label="Comenzar →" />
-          <p className="text-xs text-stone-400">Sin custodia. Sin intermediarios.</p>
+          <ConnectButton label={t.home.connectButton} />
+          <p className="text-xs text-stone-400">{t.home.noIntermediary}</p>
         </div>
       </div>
     );
@@ -137,8 +139,8 @@ export default function HomePage() {
           </svg>
         </div>
         <div className="text-center space-y-2">
-          <h2 className="text-3xl font-black tracking-tight">Contrato creado</h2>
-          <p className="text-stone-400 text-sm">Redirigiendo a tus contratos...</p>
+          <h2 className="text-3xl font-black tracking-tight">{t.home.contractCreated}</h2>
+          <p className="text-stone-400 text-sm">{t.home.redirecting}</p>
         </div>
         <a
           href={snowtraceTxUrl(txHash)}
@@ -146,7 +148,7 @@ export default function HomePage() {
           rel="noopener noreferrer"
           className="text-xs font-mono text-stone-400 underline underline-offset-4 hover:text-[#1C1917] transition-colors"
         >
-          Ver transacción →
+          {t.home.viewTx}
         </a>
       </div>
     );
@@ -174,8 +176,8 @@ export default function HomePage() {
             </svg>
           </div>
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">Propietario</p>
-            <p className="text-sm text-stone-600 mt-0.5">Crear un contrato</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">{t.home.landlordCard.tag}</p>
+            <p className="text-sm text-stone-600 mt-0.5">{t.home.landlordRole}</p>
           </div>
         </button>
 
@@ -190,8 +192,8 @@ export default function HomePage() {
             </svg>
           </div>
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">Inquilino</p>
-            <p className="text-sm text-stone-600 mt-0.5">Ver mis contratos →</p>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400">{t.home.tenantCard.tag}</p>
+            <p className="text-sm text-stone-600 mt-0.5">{t.home.tenantRole}</p>
           </div>
         </Link>
       </div>
@@ -199,18 +201,18 @@ export default function HomePage() {
       {/* Create contract form */}
       {role === "landlord" && <>
         <div className="pt-2">
-          <p className="screen-tag">nuevo contrato</p>
+          <p className="screen-tag">{t.home.formTag}</p>
           <h1 className="text-3xl font-black tracking-tight leading-none">
-            Crear contrato
+            {t.home.formTitle}
           </h1>
           <p className="text-stone-400 text-sm mt-2 leading-relaxed">
-            El depósito queda bloqueado hasta que ambas partes acuerden.
+            {t.home.formSubtitle}
           </p>
         </div>
 
         <div className="card space-y-5">
           <Input
-            label="Wallet del inquilino"
+            label={t.home.walletLabel}
             placeholder="0x..."
             value={landlord}
             onChange={e => setLandlord(e.target.value)}
@@ -219,7 +221,7 @@ export default function HomePage() {
           />
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Duración (días)"
+              label={t.home.daysLabel}
               type="number"
               placeholder="30"
               value={days}
@@ -229,7 +231,7 @@ export default function HomePage() {
               max="1095"
             />
             <Input
-              label="Garantía (AVAX)"
+              label={t.home.amountLabel}
               type="number"
               placeholder="0.5"
               value={amount}
@@ -246,11 +248,11 @@ export default function HomePage() {
           {/* Fee breakdown */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-400">Comisión (1%)</span>
+              <span className="text-sm text-stone-400">{t.home.feeRow}</span>
               <span className="text-sm font-mono font-bold text-stone-500">{formatEther(fee).slice(0, 8)} AVAX</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-stone-500 font-medium">Depósito efectivo</span>
+              <span className="text-sm text-stone-500 font-medium">{t.home.depositRow}</span>
               <span className="text-base font-black text-[#A07850] tabular-nums">{formatEther(deposit).slice(0, 8)} AVAX</span>
             </div>
           </div>
@@ -262,12 +264,12 @@ export default function HomePage() {
           )}
 
           <Button fullWidth loading={isPending} onClick={handleDeploy}>
-            Crear y bloquear depósito →
+            {t.home.createButton}
           </Button>
         </div>
 
         <p className="text-center text-[11px] text-stone-300 tracking-wide">
-          Avalanche Fuji Testnet · GarantYa v7
+          {t.home.footer}
         </p>
       </>}
     </div>

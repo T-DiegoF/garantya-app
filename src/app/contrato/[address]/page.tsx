@@ -3,28 +3,36 @@
 import { useAccount } from "wagmi";
 import { type Address, isAddress } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import dynamic from "next/dynamic";
 import { useEscrow } from "@/lib/hooks/useEscrow";
-import { TenantView } from "@/components/views/TenantView";
-import { LandlordView } from "@/components/views/LandlordView";
-import { ArbitratorView } from "@/components/views/ArbitratorView";
-import { EventTimeline } from "@/components/EventTimeline";
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
+import { useT } from "@/contexts/LanguageContext";
+
+// Lazy-load role views — only ONE is ever rendered per session.
+// This splits each view into its own chunk, saving ~8-15 kB per unused role.
+const TenantView    = dynamic(() => import("@/components/views/TenantView").then(m => ({ default: m.TenantView })),       { ssr: false });
+const LandlordView  = dynamic(() => import("@/components/views/LandlordView").then(m => ({ default: m.LandlordView })),   { ssr: false });
+const ArbitratorView = dynamic(() => import("@/components/views/ArbitratorView").then(m => ({ default: m.ArbitratorView })), { ssr: false });
+
+// Lazy-load timeline — defers blockchain log fetching until component mounts
+const EventTimeline = dynamic(() => import("@/components/EventTimeline").then(m => ({ default: m.EventTimeline })), { ssr: false });
 
 interface PageProps {
   params: { address: string };
 }
 
-export default function ContratoPage({ params }: PageProps) {
+export default function ContratoPage({ params }: Readonly<PageProps>) {
   const { address: userAddress, isConnected } = useAccount();
   const contractAddress = params.address as Address;
+  const { t } = useT();
 
   const escrow = useEscrow(contractAddress);
 
   if (!isConnected) {
     return (
       <div className="flex flex-col items-center justify-center gap-6 py-20">
-        <p className="text-stone-400 text-sm">Conectá tu wallet para ver el contrato</p>
+        <p className="text-stone-400 text-sm">{t.common.connectPrompt}</p>
         <ConnectButton />
       </div>
     );
@@ -33,8 +41,8 @@ export default function ContratoPage({ params }: PageProps) {
   if (!isAddress(contractAddress)) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <Badge variant="red">Dirección inválida</Badge>
-        <Link href="/" className="text-sm text-stone-400 underline">Volver al inicio</Link>
+        <Badge variant="red">{t.common.invalidAddress}</Badge>
+        <Link href="/" className="text-sm text-stone-400 underline">{t.common.backHome}</Link>
       </div>
     );
   }
@@ -47,7 +55,7 @@ export default function ContratoPage({ params }: PageProps) {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
           </svg>
-          Cargando contrato...
+          {t.common.loading}
         </div>
       </div>
     );
@@ -56,9 +64,9 @@ export default function ContratoPage({ params }: PageProps) {
   if (escrow.error || !escrow.tenant) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <Badge variant="red">Contrato no encontrado</Badge>
+        <Badge variant="red">{t.common.contractNotFound}</Badge>
         <p className="text-xs text-stone-400 font-mono">{contractAddress}</p>
-        <Link href="/" className="text-sm text-stone-400 underline">Volver al inicio</Link>
+        <Link href="/" className="text-sm text-stone-400 underline">{t.common.backHome}</Link>
       </div>
     );
   }
@@ -66,12 +74,12 @@ export default function ContratoPage({ params }: PageProps) {
   if (escrow.role === "unknown") {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <Badge variant="gray">Sin acceso</Badge>
+        <Badge variant="gray">{t.common.noAccess}</Badge>
         <p className="text-sm text-stone-400 text-center max-w-xs">
-          Tu wallet no es parte de este contrato.
+          {t.common.noAccessDesc}
         </p>
         <p className="text-xs font-mono text-stone-300">{userAddress}</p>
-        <Link href="/" className="text-sm text-stone-400 underline">Volver al inicio</Link>
+        <Link href="/" className="text-sm text-stone-400 underline">{t.common.backHome}</Link>
       </div>
     );
   }

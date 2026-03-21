@@ -22,6 +22,10 @@ export function useEscrow(address: Address) {
       { ...contract, functionName: "proposal" },
       { ...contract, functionName: "allocations" },
     ],
+    query: {
+      staleTime: 10_000,  // 10s — re-fetch only if data is older than 10s
+      gcTime:    60_000,  // 1 min in cache after unmount
+    },
   });
 
   const tenant          = data?.[0].result as Address | undefined;

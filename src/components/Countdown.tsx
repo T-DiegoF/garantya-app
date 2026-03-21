@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/contexts/LanguageContext";
 
 interface CountdownProps {
-  deadline: bigint;
-  totalSeconds?: number;
+  readonly deadline: bigint;
+  readonly totalSeconds?: number;
 }
 
 interface TimeLeft {
@@ -32,6 +33,7 @@ function pad(n: number) { return String(n).padStart(2, "0"); }
 
 export function Countdown({ deadline, totalSeconds = 7 * 24 * 3600 }: CountdownProps) {
   const [time, setTime] = useState<TimeLeft>(() => getTimeLeft(deadline));
+  const { t } = useT();
 
   useEffect(() => {
     const id = setInterval(() => setTime(getTimeLeft(deadline)), 1000);
@@ -45,17 +47,17 @@ export function Countdown({ deadline, totalSeconds = 7 * 24 * 3600 }: CountdownP
     return (
       <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
         <p className="text-sm font-bold text-red-800">
-          Tiempo vencido — la propuesta fue aceptada automáticamente
+          {t.countdown.expired}
         </p>
       </div>
     );
   }
 
   const units = [
-    { value: time.days,  label: "días"  },
-    { value: time.hours, label: "horas" },
-    { value: time.mins,  label: "min"   },
-    { value: time.secs,  label: "seg"   },
+    { value: time.days,  label: t.countdown.days  },
+    { value: time.hours, label: t.countdown.hours },
+    { value: time.mins,  label: t.countdown.min   },
+    { value: time.secs,  label: t.countdown.sec   },
   ];
 
   return (
@@ -81,7 +83,7 @@ export function Countdown({ deadline, totalSeconds = 7 * 24 * 3600 }: CountdownP
       </div>
       <div className="space-y-1.5">
         <div className="flex justify-between text-xs text-stone-400 font-medium">
-          <span>Tiempo restante</span>
+          <span>{t.countdown.remaining}</span>
           <span>{pct}%</span>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
