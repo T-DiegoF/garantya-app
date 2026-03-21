@@ -12,6 +12,10 @@ GarantYa replaces the traditional cash deposit with a smart contract. The tenant
 - [Contract State Machine](#contract-state-machine)
 - [Roles](#roles)
 - [Time Windows](#time-windows)
+- [User Flows](#user-flows)
+- [Screens & Views](#screens--views)
+- [Event Timeline](#event-timeline)
+- [Off-chain Metadata (Supabase)](#off-chain-metadata-supabase)
 - [Deployed Contracts](#deployed-contracts)
 - [Local Development](#local-development)
 - [Deploy to Fuji](#deploy-to-fuji)
@@ -89,6 +93,286 @@ Created ──fund()──► Funded ──proposeDistribution()──► Distri
 | Tenant response window | 7 days | Tenant must accept or reject a proposal |
 | Arbitrator window | 30 days | Arbitrator must resolve after a dispute |
 | Contract deadline | `_days` set at deploy | Tenant can reclaim if landlord never proposes |
+
+---
+
+## User Flows
+
+### Landlord — all screens
+
+```mermaid
+flowchart TD
+    A([Wallet not connected]) --> B
+
+    subgraph B["/ · Home — not connected"]
+        B1["Hero · tagline
+        Role cards: Landlord / Tenant
+        ▶ Connect wallet button"]
+    end
+
+    B --> C
+
+    subgraph C["/ · Home — connected"]
+        C1["Contract creation form
+        · Tenant wallet address
+        · Property address + map preview
+        · Landlord name · Tenant name
+        · Duration in days
+        · Guarantee amount in AVAX
+        · Fee breakdown: 1% shown
+        ▶ Deploy contract button"]
+    end
+
+    C --> D
+
+    subgraph D["/ · Home — success"]
+        D1["✓ Contract deployed
+        · New contract address
+        · Link to Snowtrace explorer
+        ▶ Share link  ▶ Go to contract"]
+    end
+
+    D --> E
+
+    subgraph E["/contrato/[address] · LandlordView · Created"]
+        E1["Waiting for tenant deposit
+        · Expected amount
+        · Tenant address · Arbitrator address
+        · Fund window countdown
+        · QR code of contract URL
+        ▶ Copy link  ▶ Share WhatsApp  ▶ Share Telegram
+        ▶ cancelPending  (after 7-day window expires)"]
+    end
+
+    E -->|Tenant deposits| F
+    E -->|7 days pass, no deposit| Z1([Cancelled — no funds])
+
+    subgraph F["/contrato/[address] · LandlordView · Funded"]
+        F1["Tenant deposited
+        · Deposit amount locked
+        · Tenant address · Arbitrator address
+        · Contract deadline countdown
+        · Split bar (adjust tenant / landlord %)
+        · Amount fields auto-calculated
+        ▶ Propose distribution"]
+    end
+
+    F --> G
+
+    subgraph G["/contrato/[address] · LandlordView · DistributionProposed"]
+        G1["Proposal sent — awaiting tenant
+        · Proposed split shown
+        · Tenant response window countdown (7d)
+        ▶ Execute timeout  (after 7d, no response)"]
+    end
+
+    G -->|Tenant accepts| H
+    G -->|Tenant rejects| I
+    G -->|7d no response| H
+
+    subgraph H["/contrato/[address] · LandlordView · Completed"]
+        H1["Distribution executed
+        · Your allocation amount
+        ▶ Withdraw funds"]
+    end
+
+    subgraph I["/contrato/[address] · LandlordView · Disputed"]
+        I1["Tenant rejected — arbitrator resolving
+        · Dispute opened timestamp
+        · Arbitrator window countdown (30d)
+        · No landlord action available"]
+    end
+
+    I -->|Arbitrator resolves| H
+    I -->|30d no arbitrator| Z2([Tenant claims full deposit])
+
+    H --> Z3([Funds withdrawn ✓])
+```
+
+---
+
+### Tenant — all screens
+
+```mermaid
+flowchart TD
+    A([Receive contract link\nfrom landlord]) --> B
+
+    subgraph B["/mis-contratos · My Contracts"]
+        B1["⚠ Alert: pending deposit on contract X
+        · Tenant section: list of contracts
+        · State badge · Days remaining
+        · Browser notification prompt
+        ▶ Click contract → detail page"]
+    end
+
+    B --> C
+
+    subgraph C["/contrato/[address] · TenantView · Created"]
+        C1["Deposit required
+        · Exact amount to send
+        · Landlord address · Arbitrator address
+        · Fund window countdown (7d)
+        ▶ Deposit  (sends exact AVAX)"]
+    end
+
+    C -->|Fund window expired| Z1([Contract expired — nothing to do])
+    C -->|Deposits| D
+
+    subgraph D["/contrato/[address] · TenantView · Funded — cancel window"]
+        D1["Deposit received ✓
+        · Amount locked
+        · Cancel window countdown (24h)
+        ▶ Cancel contract  (full refund)"]
+    end
+
+    D -->|24h pass| E
+    D -->|Cancels| W
+
+    subgraph E["/contrato/[address] · TenantView · Funded — waiting proposal"]
+        E1["Waiting for landlord proposal
+        · Deposit amount locked
+        · Contract deadline shown
+        ▶ Reclaim deposit  (only after deadline passes)"]
+    end
+
+    E -->|Deadline passes, no proposal| W
+    E -->|Landlord proposes| F
+
+    subgraph F["/contrato/[address] · TenantView · DistributionProposed"]
+        F1["Proposal received
+        · Split bar: tenant % vs landlord %
+        · Exact amounts in AVAX
+        · Response window countdown (7d)
+        ▶ Accept proposal
+        ▶ Reject & request arbitrator"]
+    end
+
+    F -->|Accepts| G
+    F -->|Rejects| H
+    F -->|7d no response — auto-executed| G
+
+    subgraph G["/contrato/[address] · TenantView · Completed"]
+        G1["Distribution confirmed
+        · Your allocation amount
+        ▶ Withdraw funds"]
+    end
+
+    subgraph H["/contrato/[address] · TenantView · Disputed"]
+        H1["Dispute opened — arbitrator resolving
+        · Arbitrator window countdown (30d)
+        ▶ Claim full deposit  (only after 30d, no resolution)"]
+    end
+
+    H -->|Arbitrator resolves| G
+    H -->|30d no resolution| W
+
+    subgraph W["/contrato/[address] · TenantView · Completed — full refund"]
+        W1["Full deposit returned
+        ▶ Withdraw funds"]
+    end
+
+    G --> Z2([Funds withdrawn ✓])
+    W --> Z2
+```
+
+---
+
+### Arbitrator — all screens
+
+```mermaid
+flowchart TD
+    A([Notified of dispute]) --> B
+
+    subgraph B["/mis-contratos · My Contracts"]
+        B1["Arbitrator section: contracts where
+        wallet matches arbitrator address
+        · State badge shows 'In dispute'
+        ▶ Click contract → detail page"]
+    end
+
+    B --> C
+
+    subgraph C["/contrato/[address] · ArbitratorView · non-Disputed states"]
+        C1["No action required
+        · Contract state displayed
+        · Parties: tenant · landlord
+        · On-chain link
+        · Event timeline below"]
+    end
+
+    C -->|State becomes Disputed| D
+
+    subgraph D["/contrato/[address] · ArbitratorView · Disputed"]
+        D1["Dispute to resolve
+        · Original landlord proposal shown
+        · Arbitrator window countdown (30d)
+        · Resolution form:
+          — Tenant amount field
+          — Landlord amount field
+          — Must sum to total deposit
+        ▶ Issue resolution  (binding, on-chain)"]
+    end
+
+    D -->|Resolves| E
+
+    subgraph E["/contrato/[address] · ArbitratorView · Completed"]
+        E1["Dispute resolved ✓
+        · Final distribution shown
+        · Both parties can now withdraw
+        · Event timeline updated"]
+    end
+
+    E --> Z([Both parties withdraw their allocation])
+```
+
+---
+
+## Event Timeline
+
+The contract detail page displays a live timeline of all on-chain events for each escrow. Events are fetched via `useContractEvents` (viem `getLogs` + `decodeEventLog`) starting from `FACTORY_DEPLOY_BLOCK` to avoid scanning from genesis.
+
+Timestamps are estimated from block numbers using Fuji's ~1 block/second rate.
+
+| Event | Color | Meaning |
+|---|---|---|
+| `ContractCreated` | grey | Escrow deployed by the landlord |
+| `Funded` | green | Tenant deposited the exact amount |
+| `Proposed` | amber | Landlord submitted a distribution proposal |
+| `Accepted` | green | Tenant accepted the proposal |
+| `Rejected` | red | Tenant rejected — dispute opened |
+| `Resolved` | blue | Arbitrator resolved the dispute |
+| `TimeoutExecuted` | grey | Proposal auto-executed after tenant window expired |
+| `ArbitratorTimeoutExecuted` | amber | Tenant reclaimed funds after arbitrator window expired |
+| `Reclaimed` | grey | Tenant reclaimed after contract deadline with no proposal |
+| `Cancelled` | grey | Tenant cancelled within 24h of funding |
+| `CancelledPending` | grey | Landlord cancelled an unfunded contract |
+| `Withdrawn` | green | A party withdrew their allocated funds |
+
+---
+
+## Off-chain Metadata (Supabase)
+
+Smart contracts only store addresses and amounts on-chain. Human-readable metadata is stored off-chain in Supabase and linked by contract address.
+
+**Schema (`ContractMetadata`):**
+
+| Field | Type | Description |
+|---|---|---|
+| `address` | `string` | Contract address (primary key) |
+| `property_address` | `string` | Physical address of the rental property |
+| `landlord_name` | `string` | Display name of the landlord |
+| `tenant_name` | `string` | Display name of the tenant |
+| `photo_url` | `string?` | Optional photo of the property |
+| `created_at` | `string?` | ISO timestamp of record creation |
+
+**Environment variables required:**
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```
+
+The anon key is public and safe to expose in the frontend. Access is controlled by Supabase Row Level Security (RLS) policies on the table.
 
 ---
 
@@ -193,11 +477,13 @@ src/
     SplitBar.tsx            # Visual deposit split bar
     DataRow.tsx
   lib/
-    contract.ts             # ABI, factory address, enums
+    contract.ts             # ABI (from artifacts), factory address, enums
+    supabase.ts             # Supabase client + ContractMetadata type
     wagmi.ts                # wagmi + Fuji chain config
     utils.ts                # Formatting helpers
     hooks/
       useEscrow.ts          # Main contract hook (reads + writes)
+      useContractEvents.ts  # Fetches and decodes on-chain event logs for the timeline
   providers/
     Web3Provider.tsx        # RainbowKit + wagmi provider
 ```
