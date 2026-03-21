@@ -35,7 +35,7 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
     deadline, proposal, allocations, refetch,
   } = escrow;
 
-  const { t } = useT();
+  const { t, locale } = useT();
   const stateLabels = [
     t.contracts.states.created, t.contracts.states.funded,
     t.contracts.states.proposed, t.contracts.states.disputed,
@@ -156,7 +156,7 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       {/* State: Created — waiting for tenant */}
       {state === ContractState.Created && (() => {
         const origin = globalThis.window?.location.origin ?? "";
-        const shareUrl = `${origin}/contrato/${address}`;
+        const shareUrl = `${origin}/contrato/${address}?lang=${locale}`;
         const waText = encodeURIComponent(t.landlord.waMessage(shareUrl));
         const tgText = encodeURIComponent(t.landlord.tgMessage);
         return (

@@ -15,6 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://garantya.vercel.app"),
   title: "GarantYa — Rental deposit on blockchain",
   description:
     "Lock your rental deposit on Avalanche. No intermediaries, no custody. The landlord proposes, you accept or reject. Funds move only when both parties agree.",
