@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePublicClient } from "wagmi";
 import { decodeEventLog, type Address, type PublicClient } from "viem";
 import { GARANTYA_ABI, FACTORY_DEPLOY_BLOCK } from "@/lib/contract";
+import { logger } from "@/lib/logger";
 
 export interface TimelineEvent {
   id: string;
@@ -34,11 +35,13 @@ const EVENT_COLORS: Record<string, TimelineEvent["color"]> = {
 };
 
 async function fetchEvents(client: PublicClient, address: Address): Promise<TimelineEvent[]> {
+  logger.log("[Garantya:useContractEvents] Fetching logs para", address);
   const logs = await client.getLogs({
     address,
     fromBlock: FACTORY_DEPLOY_BLOCK,
     toBlock: "latest",
   });
+  logger.log("[Garantya:useContractEvents] Logs crudos recibidos:", logs.length);
 
   // Fetch block timestamps in parallel (deduplicated by block number)
   const uniqueBlocks = [
@@ -75,6 +78,7 @@ async function fetchEvents(client: PublicClient, address: Address): Promise<Time
       });
     } catch {}
   }
+  logger.log("[Garantya:useContractEvents] Eventos parseados:", parsed.map(e => e.eventName));
   return parsed;
 }
 

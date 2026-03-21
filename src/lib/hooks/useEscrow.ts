@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useReadContracts, useAccount } from "wagmi";
 import { type Address } from "viem";
 import { GARANTYA_ABI } from "@/lib/contract";
 import { getUserRole } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 export function useEscrow(address: Address) {
   const { address: userAddress } = useAccount();
@@ -45,6 +47,24 @@ export function useEscrow(address: Address) {
     landlord   ?? "0x0",
     arbitrator ?? "0x0"
   );
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (error) {
+      logger.error("[Garantya:useEscrow] Error al leer contrato:", address, error);
+      return;
+    }
+    logger.log("[Garantya:useEscrow] Datos cargados", {
+      address,
+      state,
+      role,
+      deposit: deposit?.toString(),
+      expectedDeposit: expectedDeposit?.toString(),
+      tenant,
+      landlord,
+      arbitrator,
+    });
+  }, [isLoading, error, state, role, address, deposit, expectedDeposit, tenant, landlord, arbitrator]);
 
   return {
     tenant,

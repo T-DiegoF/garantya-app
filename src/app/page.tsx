@@ -1,28 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useWriteContract, useReadContract } from "wagmi";
-import { parseEther, formatEther, type Address } from "viem";
+import { useAccount, useWriteContract, useReadContract, usePublicClient } from "wagmi";
+import { parseEther, formatEther, type Address, decodeEventLog } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { FACTORY_ADDRESS, GARANTYA_FACTORY_ABI } from "@/lib/contract";
+import { FACTORY_ADDRESS, GARANTYA_FACTORY_ABI, GARANTYA_ABI } from "@/lib/contract";
 import { snowtraceTxUrl } from "@/lib/utils";
 import { useT } from "@/contexts/LanguageContext";
+import { supabase } from "@/lib/supabase";
+import { PropertyMap } from "@/components/PropertyMap";
 
 export default function HomePage() {
   const router  = useRouter();
   const { address, isConnected } = useAccount();
   const { t } = useT();
 
-  const [role,     setRole]     = useState<"landlord" | null>(null);
-  const [landlord, setLandlord] = useState("");
-  const [days,     setDays]     = useState("30");
-  const [amount,   setAmount]   = useState("0.5");
-  const [errors,   setErrors]   = useState<Record<string, string>>({});
-  const [txHash,   setTxHash]   = useState<string | null>(null);
+  const publicClient = usePublicClient();
+
+  const [role,            setRole]            = useState<"landlord" | null>(null);
+  const [landlord,        setLandlord]        = useState("");
+  const [days,            setDays]            = useState("30");
+  const [amount,          setAmount]          = useState("0.5");
+  const [propertyAddress, setPropertyAddress] = useState("");
+  const [landlordName,    setLandlordName]    = useState("");
+  const [tenantName,      setTenantName]      = useState("");
+  const [errors,          setErrors]          = useState<Record<string, string>>({});
+  const [txHash,          setTxHash]          = useState<string | null>(null);
 
   const { data: feeBps } = useReadContract({
     address: FACTORY_ADDRESS,
@@ -65,9 +72,28 @@ export default function HomePage() {
         args: [landlord as Address, amountWei, BigInt(days)],
       });
       setTxHash(hash);
+
+      // Leer receipt para obtener la address del contrato nuevo
+      const receipt = await publicClient!.waitForTransactionReceipt({ hash });
+      const createdLog = receipt.logs.find(log => {
+        try {
+          const decoded = decodeEventLog({ abi: GARANTYA_ABI, data: log.data, topics: log.topics });
+          return decoded.eventName === "ContractCreated";
+        } catch { return false; }
+      });
+
+      if (createdLog) {
+        await supabase.from("contracts").insert({
+          address:          createdLog.address,
+          property_address: propertyAddress,
+          landlord_name:    landlordName,
+          tenant_name:      tenantName,
+        });
+      }
+
       setTimeout(() => router.push(`/mis-contratos`), 3000);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Error desconocido";
+      const msg = err instanceof Error ? err.message : "Unknown error";
       setErrors({ submit: msg.includes("rejected") ? t.home.errors.rejected : t.home.errors.createFailed });
     }
   }
@@ -219,6 +245,29 @@ export default function HomePage() {
             error={errors.landlord}
             mono
           />
+          <div className="space-y-2">
+            <Input
+              label="Dirección del inmueble"
+              placeholder="Av. Corrientes 1234, CABA"
+              value={propertyAddress}
+              onChange={e => setPropertyAddress(e.target.value)}
+            />
+            <PropertyMap address={propertyAddress} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              label="Tu nombre"
+              placeholder="Nombre arrendador"
+              value={landlordName}
+              onChange={e => setLandlordName(e.target.value)}
+            />
+            <Input
+              label="Nombre inquilino"
+              placeholder="Nombre inquilino"
+              value={tenantName}
+              onChange={e => setTenantName(e.target.value)}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <Input
               label={t.home.daysLabel}

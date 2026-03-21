@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { type Address, isAddress } from "viem";
 import Link from "next/link";
@@ -11,6 +11,7 @@ import { shortenAddress } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useT } from "@/contexts/LanguageContext";
+import { logger } from "@/lib/logger";
 
 function AlertBanner({ contracts, targetState, title, description }: {
   contracts: Address[];
@@ -127,7 +128,12 @@ export default function MisContratosPage() {
 
   function handleSearch() {
     const addr = searchAddress.trim();
-    if (!isAddress(addr)) { setSearchError(t.common.invalidAddress); return; }
+    if (!isAddress(addr)) {
+      logger.warn("[Garantya:MisContratos] Búsqueda con dirección inválida:", addr);
+      setSearchError(t.common.invalidAddress);
+      return;
+    }
+    logger.log("[Garantya:MisContratos] Navegando a contrato:", addr);
     router.push(`/contrato/${addr}`);
   }
 
@@ -149,6 +155,15 @@ export default function MisContratosPage() {
 
   const tenantContracts   = (asTenant   as Address[] | undefined) ?? [];
   const landlordContracts = (asLandlord as Address[] | undefined) ?? [];
+
+  useEffect(() => {
+    if (!address) return;
+    logger.log("[Garantya:MisContratos] Contratos cargados para", address, {
+      comoArrendador: landlordContracts.length,
+      comoInquilino: tenantContracts.length,
+    });
+  }, [address, landlordContracts.length, tenantContracts.length]);
+
   const allContracts      = useMemo(
     () => [...landlordContracts, ...tenantContracts],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -226,7 +241,7 @@ export default function MisContratosPage() {
   return (
     <div className="space-y-8 animate-fade-up">
 
-      {/* Inquilino: depósito pendiente */}
+      {/* Tenant: pending deposit */}
       {tenantContracts.length > 0 && (
         <AlertBanner
           contracts={tenantContracts}
@@ -236,7 +251,7 @@ export default function MisContratosPage() {
         />
       )}
 
-      {/* Propietario: depósito recibido, acción requerida */}
+      {/* Landlord: deposit received, action required */}
       {landlordContracts.length > 0 && (
         <AlertBanner
           contracts={landlordContracts}

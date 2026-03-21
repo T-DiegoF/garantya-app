@@ -12,6 +12,7 @@ import { GARANTYA_ABI, ContractState } from "@/lib/contract";
 import { formatAVAX, shortenAddress, snowtraceUrl } from "@/lib/utils";
 import type { useEscrow } from "@/lib/hooks/useEscrow";
 import { useT } from "@/contexts/LanguageContext";
+import { logger } from "@/lib/logger";
 
 type EscrowData = ReturnType<typeof useEscrow>;
 
@@ -32,6 +33,7 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
   const [action,        setAction]        = useState<string | null>(null);
 
   async function call(fn: string, args: unknown[] = []) {
+    logger.log(`[Garantya:ArbitratorView] Llamando ${fn}`, { address, args });
     setAction(fn);
     setError(null);
     try {
@@ -41,9 +43,11 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
         functionName: fn as never,
         args: args as never,
       });
+      logger.log(`[Garantya:ArbitratorView] ${fn} exitoso`);
       await refetch();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error";
+      logger.error(`[Garantya:ArbitratorView] ${fn} error:`, msg);
       setError(msg.includes("rejected") ? t.common.rejected : t.common.execError);
     } finally {
       setAction(null);
@@ -58,6 +62,8 @@ export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {
     try { la = parseEther(landlordShare); } catch { e.landlord = t.arbitrator.errors.invalidValue; la = 0n; }
     if (!e.tenant && !e.landlord && ta + la !== deposit)
       e.tenant = t.arbitrator.errors.sumMustBe(formatAVAX(deposit));
+    if (Object.keys(e).length > 0)
+      logger.warn("[Garantya:ArbitratorView] Validación resolución fallida:", e);
     setErrors(e);
     return Object.keys(e).length === 0;
   }

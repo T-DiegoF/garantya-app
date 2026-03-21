@@ -15,6 +15,7 @@ import {
 } from "@/lib/utils";
 import type { useEscrow } from "@/lib/hooks/useEscrow";
 import { useT } from "@/contexts/LanguageContext";
+import { logger } from "@/lib/logger";
 
 type EscrowData = ReturnType<typeof useEscrow>;
 
@@ -41,6 +42,7 @@ export function TenantView({ address, escrow }: TenantViewProps) {
   const [error,  setError]  = useState<string | null>(null);
 
   async function call(fn: string, args: unknown[] = []) {
+    logger.log(`[Garantya:TenantView] Llamando ${fn}`, { address, args });
     setAction(fn);
     setError(null);
     try {
@@ -50,9 +52,11 @@ export function TenantView({ address, escrow }: TenantViewProps) {
         functionName: fn as never,
         args: args as never,
       });
+      logger.log(`[Garantya:TenantView] ${fn} exitoso`);
       await refetch();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error";
+      logger.error(`[Garantya:TenantView] ${fn} error:`, msg);
       setError(msg.includes("rejected") ? t.common.rejected : t.common.execError);
     } finally {
       setAction(null);

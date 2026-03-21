@@ -7,6 +7,11 @@ const nextConfig = {
     optimizePackageImports: ["@rainbow-me/rainbowkit", "wagmi", "viem"],
   },
 
+  webpack: (config) => {
+    config.resolve.alias["@react-native-async-storage/async-storage"] = false;
+    return config;
+  },
+
   // Cache immutable static assets for 1 year
   async headers() {
     return [

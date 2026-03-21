@@ -20,6 +20,7 @@ import {
 } from "@/lib/utils";
 import type { useEscrow } from "@/lib/hooks/useEscrow";
 import { useT } from "@/contexts/LanguageContext";
+import { logger } from "@/lib/logger";
 
 type EscrowData = ReturnType<typeof useEscrow>;
 
@@ -48,6 +49,7 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
   const [proposeErrors,  setProposeErrors]  = useState<Record<string, string>>({});
 
   async function call(fn: string, args: unknown[] = []) {
+    logger.log(`[Garantya:LandlordView] Llamando ${fn}`, { address, args });
     setAction(fn);
     setError(null);
     try {
@@ -57,9 +59,11 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
         functionName: fn as never,
         args: args as never,
       });
+      logger.log(`[Garantya:LandlordView] ${fn} exitoso`);
       await refetch();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error";
+      logger.error(`[Garantya:LandlordView] ${fn} error:`, msg);
       setError(msg.includes("rejected") ? t.common.rejected : t.common.execError);
     } finally {
       setAction(null);
@@ -74,6 +78,8 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
     try { la = parseEther(landlordShare); } catch { e.landlord = t.landlord.errors.invalidValue; la = 0n; }
     if (!e.tenant && !e.landlord && ta + la !== deposit)
       e.tenant = t.landlord.errors.sumMustBe(formatAVAX(deposit));
+    if (Object.keys(e).length > 0)
+      logger.warn("[Garantya:LandlordView] Validación propuesta fallida:", e);
     setProposeErrors(e);
     return Object.keys(e).length === 0;
   }

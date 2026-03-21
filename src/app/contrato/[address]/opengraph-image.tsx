@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Depósito de garantía — GarantYa";
+export const alt = "Rental guarantee — GarantYa";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -9,7 +9,7 @@ interface Props {
   params: { address: string };
 }
 
-export default function Image({ params }: Props) {
+export default function Image({ params }: Readonly<Props>) {
   const addr = params.address;
   const short = `${addr.slice(0, 10)}...${addr.slice(-8)}`;
 
@@ -58,12 +58,12 @@ export default function Image({ params }: Props) {
               lineHeight: 1.05,
             }}
           >
-            Depositá tu
+            Deposit your
             <br />
-            garantía aquí
+            guarantee here
           </div>
           <div style={{ fontSize: 28, color: "#78716C", lineHeight: 1.5, maxWidth: 700 }}>
-            Tu propietario te invita a depositar tu garantía de alquiler de forma segura, sin intermediarios y 100% on-chain.
+            Your landlord invites you to deposit your rental guarantee securely, with no intermediaries and 100% on-chain.
           </div>
         </div>
 
@@ -84,7 +84,7 @@ export default function Image({ params }: Props) {
           </div>
           {/* Trust badges */}
           <div style={{ display: "flex", gap: "12px" }}>
-            {["Sin intermediarios", "Fondos bloqueados", "Árbitro independiente"].map((label) => (
+            {["No intermediaries", "Funds locked", "Independent arbitrator"].map((label) => (
               <div
                 key={label}
                 style={{
