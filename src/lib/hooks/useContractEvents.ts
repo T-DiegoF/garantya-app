@@ -66,7 +66,7 @@ async function fetchEvents(client: PublicClient, address: Address): Promise<Time
         label: eventName,
         color,
         eventName,
-        eventArgs: decoded.args as Args,
+        eventArgs: decoded.args as unknown as Args,
         timestamp,
       });
     } catch {}

@@ -38,6 +38,7 @@ export default function HomePage() {
     abi: GARANTYA_FACTORY_ABI,
     functionName: "feeBps",
   });
+  const feeBpsBigInt = feeBps as bigint | undefined;
 
   const { writeContractAsync, isPending } = useWriteContract();
 
@@ -45,7 +46,7 @@ export default function HomePage() {
     try { return parseEther(amount); } catch { return 0n; }
   })();
 
-  const fee     = feeBps ? (amountWei * feeBps) / 10000n : 0n;
+  const fee     = feeBpsBigInt ? (amountWei * feeBpsBigInt) / 10000n : 0n;
   const deposit = amountWei - fee;
 
   function validate(): boolean {
