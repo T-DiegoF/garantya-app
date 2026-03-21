@@ -25,8 +25,8 @@ export function useEscrow(address: Address) {
       { ...contract, functionName: "allocations" },
     ],
     query: {
-      staleTime: 10_000,  // 10s — re-fetch only if data is older than 10s
-      gcTime:    60_000,  // 1 min in cache after unmount
+      staleTime: 30_000,       // 30s — contract state changes only on-chain txs
+      gcTime:    5 * 60_000,   // 5 min in cache after unmount
     },
   });
 

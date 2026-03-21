@@ -4,6 +4,8 @@ import { Web3Provider } from "@/providers/Web3Provider";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { NavigationProgress } from "@/components/NavigationProgress";
+import { Suspense } from "react";
 import "./globals.css";
 
 const inter = Inter({
@@ -41,6 +43,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className="bg-[#F5F0E8] text-[#1C1917] antialiased">
         <LanguageProvider>
           <Web3Provider>
+            <Suspense>
+              <NavigationProgress />
+            </Suspense>
             <div className="flex min-h-screen flex-col">
               <Nav />
               <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:px-6">

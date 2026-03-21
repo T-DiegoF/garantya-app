@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { useAccount, useReadContract, useReadContracts } from "wagmi";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useAccount, useReadContract, useReadContracts, usePublicClient } from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
 import { type Address, isAddress } from "viem";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { FACTORY_ADDRESS, GARANTYA_FACTORY_ABI, GARANTYA_ABI, ContractState } from "@/lib/contract";
-import { shortenAddress } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useT } from "@/contexts/LanguageContext";
 import { logger } from "@/lib/logger";
+import { supabase, type ContractMetadata } from "@/lib/supabase";
 
 function AlertBanner({ contracts, targetState, title, description }: {
   contracts: Address[];
@@ -67,7 +68,7 @@ function HighlightedAddress({ address, query }: { address: string; query: string
   );
 }
 
-function ContractItem({ address, state, index, highlight, daysLeft, statePill }: { address: Address; state: number | undefined; index: number; highlight?: string; daysLeft?: number; statePill: Record<number, { label: string; className: string }> }) {
+function ContractItem({ address, state, index, highlight, daysLeft, statePill, meta, onHover }: { address: Address; state: number | undefined; index: number; highlight?: string; daysLeft?: number; statePill: Record<number, { label: string; className: string }>; meta?: ContractMetadata; onHover?: () => void }) {
   const { t } = useT();
   const pill = state !== undefined ? statePill[state] : undefined;
   const isCompleted = state === ContractState.Completed;
@@ -79,6 +80,7 @@ function ContractItem({ address, state, index, highlight, daysLeft, statePill }:
       <div
         className={`card transition-all duration-150 cursor-pointer group hover:-translate-y-px ${isCompleted ? "opacity-60 hover:opacity-100" : "hover:border-stone-300"}`}
         style={{ animationDelay: `${index * 50}ms` }}
+        onMouseEnter={onHover}
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -87,9 +89,22 @@ function ContractItem({ address, state, index, highlight, daysLeft, statePill }:
                 <path d="M2 7l5-5 5 5M3 6.5V12h3V9h2v3h3V6.5" stroke="#A07850" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <span className="font-mono text-sm text-stone-600 tracking-tight truncate">
-              <HighlightedAddress address={address} query={highlight ?? ""} />
-            </span>
+            <div className="min-w-0">
+              {meta?.property_address ? (
+                <>
+                  <p className="text-sm font-semibold text-stone-700 truncate">{meta.property_address}</p>
+                  {(meta.landlord_name || meta.tenant_name) && (
+                    <p className="text-[11px] text-stone-400 truncate">
+                      {meta.landlord_name} → {meta.tenant_name}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <span className="font-mono text-sm text-stone-600 tracking-tight truncate">
+                  <HighlightedAddress address={address} query={highlight ?? ""} />
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {showDays && (
@@ -116,6 +131,16 @@ export default function MisContratosPage() {
   const [searchAddress, setSearchAddress] = useState("");
   const [searchError,   setSearchError]   = useState("");
   const { t } = useT();
+  const queryClient  = useQueryClient();
+  const publicClient = usePublicClient();
+
+  const prefetchContract = useCallback((contractAddr: Address) => {
+    queryClient.prefetchQuery({
+      queryKey: ["readContracts", { address: contractAddr }],
+      queryFn: () => publicClient!.readContract({ address: contractAddr, abi: GARANTYA_ABI, functionName: "state" }),
+      staleTime: 30_000,
+    });
+  }, [queryClient, publicClient]);
 
   const STATE_PILL: Record<number, { label: string; className: string }> = {
     [ContractState.Created]:              { label: t.contracts.states.created,   className: "bg-stone-100 text-stone-500" },
@@ -137,24 +162,27 @@ export default function MisContratosPage() {
     router.push(`/contrato/${addr}`);
   }
 
-  const { data: asTenant } = useReadContract({
+  const { data: asTenant, isLoading: loadingTenant } = useReadContract({
     address: FACTORY_ADDRESS,
     abi: GARANTYA_FACTORY_ABI,
     functionName: "getContractsByTenant",
     args: [address!, 0n, 20n],
-    query: { enabled: !!address },
+    query: { enabled: !!address, staleTime: 30_000, gcTime: 5 * 60_000 },
   });
 
-  const { data: asLandlord } = useReadContract({
+  const { data: asLandlord, isLoading: loadingLandlord } = useReadContract({
     address: FACTORY_ADDRESS,
     abi: GARANTYA_FACTORY_ABI,
     functionName: "getContractsByLandlord",
     args: [address!, 0n, 20n],
-    query: { enabled: !!address },
+    query: { enabled: !!address, staleTime: 30_000, gcTime: 5 * 60_000 },
   });
 
+  const isLoadingContracts = loadingTenant || loadingLandlord;
   const tenantContracts   = (asTenant   as Address[] | undefined) ?? [];
   const landlordContracts = (asLandlord as Address[] | undefined) ?? [];
+
+  const [metaMap, setMetaMap] = useState<Record<string, ContractMetadata>>({});
 
   useEffect(() => {
     if (!address) return;
@@ -163,6 +191,38 @@ export default function MisContratosPage() {
       comoInquilino: tenantContracts.length,
     });
   }, [address, landlordContracts.length, tenantContracts.length]);
+
+  // Fetch metadata from Supabase for all contracts
+  useEffect(() => {
+    const all = [...landlordContracts, ...tenantContracts];
+    if (all.length === 0) return;
+    supabase
+      .from("contracts")
+      .select("*")
+      .in("address", all)
+      .then(({ data }) => {
+        if (!data) return;
+        const map: Record<string, ContractMetadata> = {};
+        data.forEach(row => { map[row.address.toLowerCase()] = row; });
+        setMetaMap(map);
+      });
+  }, [landlordContracts.length, tenantContracts.length]);
+
+  // Browser notification for tenant with pending deposit
+  useEffect(() => {
+    if (tenantContracts.length === 0) return;
+    if (!("Notification" in window)) return;
+    if (Notification.permission === "denied") return;
+    const notify = () => new Notification("GarantYa", {
+      body: "Tenés un contrato esperando tu depósito de garantía.",
+      icon: "/favicon.ico",
+    });
+    if (Notification.permission === "granted") {
+      notify();
+    } else {
+      Notification.requestPermission().then(p => { if (p === "granted") notify(); });
+    }
+  }, [tenantContracts.length]);
 
   const allContracts      = useMemo(
     () => [...landlordContracts, ...tenantContracts],
@@ -189,6 +249,7 @@ export default function MisContratosPage() {
   });
 
   const hasContracts = tenantContracts.length > 0 || landlordContracts.length > 0;
+  const dataReady    = !isLoadingContracts && !!address;
 
   // O(1) lookup maps — rebuilt only when contract list or chain data changes
   const stateMap = useMemo(() => {
@@ -302,8 +363,17 @@ export default function MisContratosPage() {
         )}
       </div>
 
+      {/* Loading state */}
+      {isLoadingContracts && (
+        <div className="card py-14 flex flex-col items-center gap-4 animate-pulse">
+          <div className="w-12 h-12 rounded-2xl bg-stone-100" />
+          <div className="h-4 w-32 rounded-full bg-stone-100" />
+          <div className="h-3 w-48 rounded-full bg-stone-100" />
+        </div>
+      )}
+
       {/* Empty state */}
-      {!hasContracts && (
+      {dataReady && !hasContracts && (
         <div className="card py-14 flex flex-col items-center gap-5">
           <div className="w-12 h-12 rounded-2xl bg-[#F5F0E8] border border-[#E5DFD5] flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -329,7 +399,7 @@ export default function MisContratosPage() {
             <span className="text-[11px] font-bold text-stone-300">{filteredLandlord.length}</span>
           </div>
           {filteredLandlord.map((addr, i) => (
-            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} statePill={STATE_PILL} />
+            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} statePill={STATE_PILL} meta={metaMap[addr.toLowerCase()]} onHover={() => prefetchContract(addr)} />
           ))}
         </div>
       )}
@@ -342,7 +412,7 @@ export default function MisContratosPage() {
             <span className="text-[11px] font-bold text-stone-300">{filteredTenant.length}</span>
           </div>
           {filteredTenant.map((addr, i) => (
-            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} statePill={STATE_PILL} />
+            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} statePill={STATE_PILL} meta={metaMap[addr.toLowerCase()]} onHover={() => prefetchContract(addr)} />
           ))}
         </div>
       )}

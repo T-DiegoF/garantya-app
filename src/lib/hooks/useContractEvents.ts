@@ -36,26 +36,17 @@ const EVENT_COLORS: Record<string, TimelineEvent["color"]> = {
 
 async function fetchEvents(client: PublicClient, address: Address): Promise<TimelineEvent[]> {
   logger.log("[Garantya:useContractEvents] Fetching logs para", address);
-  const logs = await client.getLogs({
-    address,
-    fromBlock: FACTORY_DEPLOY_BLOCK,
-    toBlock: "latest",
-  });
+
+  // Get current block once to estimate timestamps from block numbers
+  const [logs, latestBlock] = await Promise.all([
+    client.getLogs({ address, fromBlock: FACTORY_DEPLOY_BLOCK, toBlock: "latest" }),
+    client.getBlock({ blockTag: "latest" }),
+  ]);
   logger.log("[Garantya:useContractEvents] Logs crudos recibidos:", logs.length);
 
-  // Fetch block timestamps in parallel (deduplicated by block number)
-  const uniqueBlocks = [
-    ...new Set(logs.map(l => l.blockNumber).filter((bn): bn is bigint => bn != null)),
-  ];
-  const timestamps = new Map<bigint, number>();
-  await Promise.all(
-    uniqueBlocks.map(async (bn) => {
-      try {
-        const block = await client.getBlock({ blockNumber: bn });
-        timestamps.set(bn, Number(block.timestamp));
-      } catch {}
-    })
-  );
+  // Fuji produces ~1 block/sec — estimate timestamp from block number offset
+  const nowTs      = Number(latestBlock.timestamp);
+  const nowBlock   = Number(latestBlock.number);
 
   const parsed: TimelineEvent[] = [];
   for (const log of logs) {
@@ -68,13 +59,15 @@ async function fetchEvents(client: PublicClient, address: Address): Promise<Time
       const eventName = String(decoded.eventName);
       const color = EVENT_COLORS[eventName];
       if (!color) continue;
+      const blockDiff = log.blockNumber ? nowBlock - Number(log.blockNumber) : 0;
+      const timestamp = nowTs - blockDiff; // ~1 block/sec on Fuji
       parsed.push({
         id: `${log.transactionHash}-${log.logIndex ?? 0}`,
-        label: eventName, // fallback; EventTimeline overrides with i18n
+        label: eventName,
         color,
         eventName,
         eventArgs: decoded.args as Args,
-        timestamp: log.blockNumber ? timestamps.get(log.blockNumber) : undefined,
+        timestamp,
       });
     } catch {}
   }
@@ -89,8 +82,8 @@ export function useContractEvents(address: Address) {
     queryKey: ["contractEvents", address],
     queryFn: () => fetchEvents(client!, address),
     enabled: !!client,
-    staleTime: 30_000,   // 30s — blockchain data changes only on new txs
-    gcTime:    5 * 60_000, // 5 min in cache after unmount
+    staleTime: 60_000,      // 1 min — events only change on new txs
+    gcTime:    10 * 60_000, // 10 min — past events never change
   });
 
   return { events, isLoading };

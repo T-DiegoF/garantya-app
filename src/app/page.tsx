@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { FACTORY_ADDRESS, GARANTYA_FACTORY_ABI, GARANTYA_ABI } from "@/lib/contract";
-import { snowtraceTxUrl } from "@/lib/utils";
+import { snowtraceTxUrl, snowtraceUrl } from "@/lib/utils";
 import { useT } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { PropertyMap } from "@/components/PropertyMap";
@@ -28,8 +28,10 @@ export default function HomePage() {
   const [propertyAddress, setPropertyAddress] = useState("");
   const [landlordName,    setLandlordName]    = useState("");
   const [tenantName,      setTenantName]      = useState("");
-  const [errors,          setErrors]          = useState<Record<string, string>>({});
-  const [txHash,          setTxHash]          = useState<string | null>(null);
+  const [errors,           setErrors]           = useState<Record<string, string>>({});
+  const [txHash,           setTxHash]           = useState<string | null>(null);
+  const [contractAddress,  setContractAddress]  = useState<string | null>(null);
+  const [isSubmitting,     setIsSubmitting]     = useState(false);
 
   const { data: feeBps } = useReadContract({
     address: FACTORY_ADDRESS,
@@ -63,7 +65,8 @@ export default function HomePage() {
   }
 
   async function handleDeploy() {
-    if (!validate()) return;
+    if (!validate() || isSubmitting) return;
+    setIsSubmitting(true);
     try {
       const hash = await writeContractAsync({
         address: FACTORY_ADDRESS,
@@ -83,6 +86,7 @@ export default function HomePage() {
       });
 
       if (createdLog) {
+        setContractAddress(createdLog.address);
         await supabase.from("contracts").insert({
           address:          createdLog.address,
           property_address: propertyAddress,
@@ -91,10 +95,15 @@ export default function HomePage() {
         });
       }
 
-      setTimeout(() => router.push(`/mis-contratos`), 3000);
+      setTimeout(() => {
+        window.dispatchEvent(new Event("navigationstart"));
+        router.push(`/mis-contratos`);
+      }, 5000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Unknown error";
       setErrors({ submit: msg.includes("rejected") ? t.home.errors.rejected : t.home.errors.createFailed });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -168,14 +177,28 @@ export default function HomePage() {
           <h2 className="text-3xl font-black tracking-tight">{t.home.contractCreated}</h2>
           <p className="text-stone-400 text-sm">{t.home.redirecting}</p>
         </div>
-        <a
-          href={snowtraceTxUrl(txHash)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs font-mono text-stone-400 underline underline-offset-4 hover:text-[#1C1917] transition-colors"
-        >
-          {t.home.viewTx}
-        </a>
+        <div className="card w-full space-y-3">
+          <a
+            href={snowtraceTxUrl(txHash)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between text-xs font-mono text-stone-500 hover:text-[#A07850] transition-colors"
+          >
+            <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Transacción</span>
+            <span className="underline underline-offset-2">{txHash.slice(0, 10)}...{txHash.slice(-6)} →</span>
+          </a>
+          {contractAddress && (
+            <a
+              href={snowtraceUrl(contractAddress as Address)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between text-xs font-mono text-stone-500 hover:text-[#A07850] transition-colors"
+            >
+              <span className="text-[10px] font-bold uppercase tracking-widest text-stone-400">Contrato</span>
+              <span className="underline underline-offset-2">{contractAddress.slice(0, 10)}...{contractAddress.slice(-6)} →</span>
+            </a>
+          )}
+        </div>
       </div>
     );
   }
@@ -312,7 +335,7 @@ export default function HomePage() {
             </p>
           )}
 
-          <Button fullWidth loading={isPending} onClick={handleDeploy}>
+          <Button fullWidth loading={isPending || isSubmitting} onClick={handleDeploy}>
             {t.home.createButton}
           </Button>
         </div>
