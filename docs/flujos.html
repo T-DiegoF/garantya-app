@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GarantYa — Flujos de usuario</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #F5F0E8;
+      color: #1C1917;
+      padding: 40px 24px 80px;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: #78716C;
+      font-size: 14px;
+      margin-bottom: 48px;
+    }
+
+    /* ── Section ── */
+    .section {
+      margin-bottom: 56px;
+    }
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #A8A29E;
+      margin-bottom: 10px;
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 6px;
+    }
+    .section-desc {
+      font-size: 13px;
+      color: #78716C;
+      margin-bottom: 24px;
+      max-width: 560px;
+      line-height: 1.6;
+    }
+
+    /* ── Flow diagram ── */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 640px;
+    }
+    .flow-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+    }
+    .flow-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .connector-v {
+      width: 2px;
+      min-height: 20px;
+      background: #D6CFC4;
+      flex-shrink: 0;
+      margin: 0 auto;
+    }
+    .connector-h {
+      flex: 1;
+      height: 2px;
+      background: #D6CFC4;
+      align-self: center;
+    }
+    .branch-container {
+      display: flex;
+      gap: 12px;
+      margin-top: 0;
+    }
+    .branch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+
+    /* ── Node ── */
+    .node {
+      background: white;
+      border: 1.5px solid #E0D9CE;
+      border-radius: 14px;
+      padding: 12px 16px;
+      width: 100%;
+      box-shadow: 0 1px 4px rgba(28,25,23,0.06);
+      position: relative;
+    }
+    .node.start {
+      background: #1C1917;
+      color: #F5F0E8;
+      border-color: #1C1917;
+      text-align: center;
+    }
+    .node.start .node-title { color: #F5F0E8; font-size: 13px; }
+    .node.action {
+      border-color: #A07850;
+      background: #FFFBF5;
+    }
+    .node.state-created  { border-color: #D6D3D1; background: #FAFAF9; }
+    .node.state-funded   { border-color: #86EFAC; background: #F0FDF4; }
+    .node.state-proposed { border-color: #FCD34D; background: #FFFBEB; }
+    .node.state-disputed { border-color: #FCA5A5; background: #FFF1F2; }
+    .node.state-done     { border-color: #D6D3D1; background: #FAFAF9; opacity: 0.7; }
+    .node.decision {
+      background: #FFF7ED;
+      border-color: #FDBA74;
+      border-radius: 8px;
+    }
+    .node.info {
+      background: #F1F5F9;
+      border-color: #CBD5E1;
+    }
+
+    .node-tag {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #A8A29E;
+      margin-bottom: 3px;
+    }
+    .node-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1C1917;
+      line-height: 1.3;
+    }
+    .node-desc {
+      font-size: 11px;
+      color: #78716C;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .node-actions {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .chip {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: #F5F0E8;
+      border: 1px solid #E5DFD5;
+      color: #57534E;
+    }
+    .chip.action { background: #1C1917; color: #F5F0E8; border-color: #1C1917; }
+    .chip.warn   { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+    .chip.danger { background: #FEE2E2; color: #991B1B; border-color: #FCA5A5; }
+    .chip.success{ background: #DCFCE7; color: #166534; border-color: #86EFAC; }
+    .chip.neutral{ background: #F1F5F9; color: #475569; border-color: #CBD5E1; }
+
+    /* ── Role badge ── */
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 100px;
+      margin-bottom: 12px;
+    }
+    .role-badge.landlord { background: #1C1917; color: #F5F0E8; }
+    .role-badge.tenant   { background: #A07850; color: #fff; }
+    .role-badge.arbitrator { background: #7C3AED; color: #fff; }
+    .role-badge.system   { background: #0EA5E9; color: #fff; }
+
+    /* ── State timeline ── */
+    .state-timeline {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+      margin-bottom: 32px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .state-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 90px;
+    }
+    .state-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .state-line {
+      flex: 1;
+      height: 2px;
+      align-self: center;
+      margin-top: -22px;
+    }
+    .state-name {
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.3;
+    }
+    .state-sub {
+      font-size: 9px;
+      color: #A8A29E;
+      text-align: center;
+    }
+
+    /* ── Screens grid ── */
+    .screens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .screen-card {
+      background: white;
+      border: 1.5px solid #E0D9CE;
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 1px 4px rgba(28,25,23,0.06);
+    }
+    .screen-url {
+      font-family: monospace;
+      font-size: 11px;
+      background: #F5F0E8;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: #78716C;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+    .screen-name {
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .screen-desc {
+      font-size: 12px;
+      color: #78716C;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .states-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .state-item {
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #57534E;
+    }
+    .state-item::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .state-item.created::before   { background: #A8A29E; }
+    .state-item.funded::before    { background: #22C55E; }
+    .state-item.proposed::before  { background: #F59E0B; }
+    .state-item.disputed::before  { background: #EF4444; }
+    .state-item.done::before      { background: #A8A29E; }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: #E0D9CE;
+      margin: 40px 0;
+    }
+
+    /* ── Arrow label ── */
+    .arrow-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #A8A29E;
+      text-align: center;
+      padding: 2px 0;
+    }
+
+    /* ── Contract state machine ── */
+    .state-machine {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      max-width: 680px;
+    }
+    .sm-node {
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1.5px solid;
+      text-align: center;
+    }
+    .sm-node .sm-num {
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      margin-bottom: 2px;
+    }
+    .sm-node .sm-name {
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .sm-node .sm-desc {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+    .sm-0 { background: #FAFAF9; border-color: #D6D3D1; color: #57534E; }
+    .sm-1 { background: #F0FDF4; border-color: #86EFAC; color: #166534; }
+    .sm-2 { background: #FFFBEB; border-color: #FCD34D; color: #92400E; }
+    .sm-3 { background: #FFF1F2; border-color: #FCA5A5; color: #991B1B; }
+    .sm-4 { background: #F0FDF4; border-color: #86EFAC; color: #166534; opacity: 0.7; }
+    .sm-5 { background: #FAFAF9; border-color: #D6D3D1; color: #78716C; opacity: 0.7; }
+
+    .sm-transition {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: #A8A29E;
+      padding: 2px 0;
+    }
+    .sm-transition .arrow { color: #D6CFC4; font-size: 14px; }
+    .sm-transition .who {
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+    }
+    .sm-transition .who.l { background: #1C1917; color: #F5F0E8; }
+    .sm-transition .who.t { background: #A07850; color: #fff; }
+    .sm-transition .who.a { background: #7C3AED; color: #fff; }
+    .sm-transition .who.s { background: #0EA5E9; color: #fff; }
+
+    @media (max-width: 600px) {
+      .state-machine { grid-template-columns: 1fr; }
+      .branch-container { flex-direction: column; }
+    }
+
+    /* print */
+    @media print {
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="section-label">Documentación técnica</div>
+  <h1>GarantYa — Flujos de usuario</h1>
+  <p class="subtitle">3 URLs · 6 estados de contrato · 3 roles · Avalanche Fuji Testnet — Actualizado Mar 2025</p>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- PANTALLAS -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-label">Mapa de pantallas</div>
+    <div class="section-title">3 URLs, ~10 vistas únicas</div>
+    <p class="section-desc">
+      Cada URL renderiza distintos contenidos según si el usuario está conectado, su rol en el contrato, y el estado actual del escrow en blockchain.
+    </p>
+
+    <div class="screens-grid">
+      <div class="screen-card">
+        <span class="screen-url">/</span>
+        <div class="screen-name">Home</div>
+        <p class="screen-desc">Punto de entrada. Cambia completamente según conexión y rol seleccionado.</p>
+        <div class="states-list">
+          <div class="state-item created">No conectado — Hero + cards de roles</div>
+          <div class="state-item created">Conectado sin rol — Selector + Cómo funciona</div>
+          <div class="state-item funded">Propietario seleccionado — Formulario de creación</div>
+          <div class="state-item proposed">Post-deploy — Pantalla de éxito + redirect</div>
+          <div class="state-item created">Card Inquilino → redirige a /contracts</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <span class="screen-url">/contracts</span>
+        <div class="screen-name">Mis contratos</div>
+        <p class="screen-desc">Lista todos los contratos donde el wallet conectado participa (como propietario o inquilino).</p>
+        <div class="states-list">
+          <div class="state-item created">No conectado — Prompt de conexión</div>
+          <div class="state-item created">Sin contratos — Estado vacío + CTA crear</div>
+          <div class="state-item funded">Con contratos — Cards con nombre inquilino, fechas, días restantes, estado</div>
+          <div class="state-item proposed">Alertas — Banner si hay depósito pendiente o acción requerida</div>
+          <div class="state-item created">Búsqueda — Por dirección de contrato</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <span class="screen-url">/contract/[address]</span>
+        <div class="screen-name">Detalle del contrato</div>
+        <p class="screen-desc">Vista del contrato según el rol del wallet conectado. Carga datos on-chain + metadata de Supabase.</p>
+        <div class="states-list">
+          <div class="state-item funded">LandlordView — Vista del propietario</div>
+          <div class="state-item proposed">TenantView — Vista del inquilino</div>
+          <div class="state-item disputed">ArbitratorView — Vista del árbitro</div>
+          <div class="state-item created">Sin rol — Solo información del contrato</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- ESTADOS DEL CONTRATO -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-label">Smart contract</div>
+    <div class="section-title">Máquina de estados del escrow</div>
+    <p class="section-desc">
+      El contrato en Solidity define 6 estados. Cada transición solo puede ser ejecutada por un rol específico.
+    </p>
+
+    <div class="state-machine">
+
+      <div class="sm-node sm-0">
+        <div class="sm-num">Estado 0</div>
+        <div class="sm-name">Created</div>
+        <div class="sm-desc">Contrato desplegado. Esperando depósito del inquilino.</div>
+      </div>
+      <div class="sm-node sm-1">
+        <div class="sm-num">Estado 1</div>
+        <div class="sm-name">Funded</div>
+        <div class="sm-desc">Inquilino depositó el AVAX. Fondos bloqueados en escrow.</div>
+      </div>
+      <div class="sm-node sm-2">
+        <div class="sm-num">Estado 2</div>
+        <div class="sm-name">DistributionProposed</div>
+        <div class="sm-desc">Propietario propuso distribución. Espera respuesta del inquilino (7 días).</div>
+      </div>
+
+      <div class="sm-transition">
+        <span class="arrow">↓</span> <span class="who t">Inquilino</span> llama <strong>fund()</strong> enviando el AVAX exacto
+      </div>
+      <div class="sm-transition">
+        <span class="arrow">↓</span> <span class="who l">Propietario</span> llama <strong>proposeDistribution(tenantAmt, landlordAmt)</strong>
+      </div>
+      <div class="sm-transition" style="grid-column:1/-1; margin-top:8px;">
+        <span class="arrow" style="transform:rotate(90deg)">↳</span>&nbsp;
+        <span class="who t">Inquilino</span> <strong>acepta</strong> → Estado 4 (Completed) &nbsp;·&nbsp;
+        <span class="who t">Inquilino</span> <strong>rechaza</strong> → Estado 3 (Disputed) &nbsp;·&nbsp;
+        <span class="who l">Propietario</span> timeout 7d → Estado 4 (Completed)
+      </div>
+
+      <div class="sm-node sm-3">
+        <div class="sm-num">Estado 3</div>
+        <div class="sm-name">Disputed</div>
+        <div class="sm-desc">Inquilino rechazó. Árbitro tiene 30 días para resolver.</div>
+      </div>
+      <div class="sm-node sm-4">
+        <div class="sm-num">Estado 4</div>
+        <div class="sm-name">Completed</div>
+        <div class="sm-desc">Distribución finalizada. Cada parte puede retirar su parte.</div>
+      </div>
+      <div class="sm-node sm-5">
+        <div class="sm-num">Estado 5</div>
+        <div class="sm-name">Cancelled</div>
+        <div class="sm-desc">Contrato cancelado. Fondos devueltos al inquilino.</div>
+      </div>
+
+      <div class="sm-transition">
+        <span class="arrow">↓</span> <span class="who a">Árbitro</span> llama <strong>resolve(tenantAmt, landlordAmt)</strong> &nbsp;·&nbsp; timeout 30d → cualquiera llama <strong>executeArbitratorTimeout()</strong>
+      </div>
+      <div class="sm-transition">
+        <span class="arrow">↑</span> desde Funded: <span class="who t">Inquilino</span> llama <strong>cancel()</strong> dentro de la ventana &nbsp;·&nbsp; <span class="who t">Inquilino</span> <strong>reclaimExpired()</strong> si el contrato venció
+      </div>
+      <div class="sm-transition">
+        &nbsp;
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FLUJO PROPIETARIO -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-label">Flujo completo</div>
+    <div class="section-title">Propietario (Landlord)</div>
+    <p class="section-desc">
+      El propietario crea el contrato, espera el depósito, propone la distribución al finalizar la estadía y retira sus fondos.
+    </p>
+
+    <div class="flow">
+
+      <!-- START -->
+      <div class="flow-row">
+        <div class="flow-col" style="width:100%">
+          <div class="node start">
+            <div class="node-title">Conecta wallet (RainbowKit)</div>
+          </div>
+          <div class="connector-v"></div>
+        </div>
+      </div>
+
+      <!-- Selecciona rol -->
+      <div class="node action">
+        <div class="node-tag">Pantalla /</div>
+        <div class="node-title">Selecciona "Propietario"</div>
+        <div class="node-desc">Aparece el formulario de creación de contrato.</div>
+      </div>
+      <div class="connector-v"></div>
+
+      <!-- Formulario -->
+      <div class="node state-created">
+        <div class="node-tag">Formulario</div>
+        <div class="node-title">Completa datos del contrato</div>
+        <div class="node-desc">
+          Dirección wallet del inquilino · Monto de garantía (AVAX) · Duración (días) ·
+          Dirección del inmueble · Su nombre y apellido · Nombre del inquilino
+        </div>
+        <div class="node-actions">
+          <span class="chip action">Deploy contrato</span>
+          <span class="chip neutral">Fee descontado automáticamente</span>
+        </div>
+      </div>
+      <div class="connector-v"></div>
+
+      <!-- Tx éxito -->
+      <div class="node state-funded">
+        <div class="node-tag">Transacción confirmada</div>
+        <div class="node-title">Contrato creado en blockchain</div>
+        <div class="node-desc">
+          Se guarda metadata en Supabase (nombres, dirección propiedad).
+          Muestra hash de tx y address del contrato. Redirect automático a /contracts en 5 seg.
+        </div>
+      </div>
+      <div class="connector-v"></div>
+
+      <!-- Pantalla /contract estado 0 -->
+      <div class="node state-created">
+        <div class="node-tag">Estado: Created · /contract/[address]</div>
+        <div class="node-title">Esperando depósito del inquilino</div>
+        <div class="node-desc">
+          Muestra QR con la URL del contrato. Botones para compartir por WhatsApp y Telegram.
+          Link para copiar URL. Sin acciones on-chain disponibles aún.
+        </div>
+        <div class="node-actions">
+          <span class="chip warn">Compartir por WhatsApp</span>
+          <span class="chip warn">Compartir por Telegram</span>
+          <span class="chip">Copiar link</span>
+        </div>
+      </div>
+      <div class="connector-v"></div>
+
+      <!-- Estado 1 funded -->
+      <div class="node state-funded">
+        <div class="node-tag">Estado: Funded · Inquilino depositó</div>
+        <div class="node-title">Propone distribución al finalizar</div>
+        <div class="node-desc">
+          Ingresa cuánto AVAX devuelve al inquilino y cuánto retiene para sí.
+          La suma debe ser igual al depósito total. El inquilino tiene 7 días para responder.
+        </div>
+        <div class="node-actions">
+          <span class="chip action">proposeDistribution()</span>
+        </div>
+      </div>
+      <div class="connector-v"></div>
+
+      <!-- Estado 2 — Branch aceptar/rechazar -->
+      <div class="node state-proposed">
+        <div class="node-tag">Estado: DistributionProposed</div>
+        <div class="node-title">Esperando respuesta del inquilino</div>
+        <div class="node-desc">
+          Ve la propuesta enviada y la fecha de vencimiento (7 días).
+          Si el inquilino no responde, puede ejecutar el timeout para completar automáticamente.
+        </div>
+        <div class="node-actions">
+          <span class="chip action">executeTimeout() — tras 7 días</span>
+        </div>
+      </div>
+      <div class="connector-v"></div>
+
+      <div class="arrow-label">↙ acepta &nbsp;&nbsp;&nbsp;&nbsp; rechaza ↘</div>
+      <div class="branch-container">
+
+        <div class="branch">
+          <div class="node state-funded">
+            <div class="node-tag">Inquilino acepta</div>
+            <div class="node-title">Estado: Completed</div>
+            <div class="node-desc">Retira su parte según lo acordado.</div>
+            <div class="node-actions"><span class="chip success">withdraw()</span></div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <div class="node state-disputed">
+            <div class="node-tag">Inquilino rechaza</div>
+            <div class="node-title">Estado: Disputed</div>
+            <div class="node-desc">
+              Ve el banner de disputa. Espera resolución del árbitro.
+              Sin acciones disponibles hasta que el árbitro resuelva.
+            </div>
+          </div>
+          <div class="connector-v" style="min-height:16px"></div>
+          <div class="node state-funded">
+            <div class="node-tag">Árbitro resuelve</div>
+            <div class="node-title">Estado: Completed</div>
+            <div class="node-desc">Retira la parte asignada por el árbitro.</div>
+            <div class="node-actions"><span class="chip success">withdraw()</span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FLUJO INQUILINO -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-label">Flujo completo</div>
+    <div class="section-title">Inquilino (Tenant)</div>
+    <p class="section-desc">
+      El inquilino recibe un link del propietario, deposita la garantía y al finalizar acepta o rechaza la propuesta de distribución.
+    </p>
+
+    <div class="flow">
+
+      <div class="node start">
+        <div class="node-title">Recibe link por WhatsApp / Telegram</div>
+      </div>
+      <div class="connector-v"></div>
+
+      <div class="node action">
+        <div class="node-tag">Pantalla /contract/[address]</div>
+        <div class="node-title">Abre la URL del contrato</div>
+        <div class="node-desc">Ve datos del propietario, árbitro, monto requerido y fecha de vencimiento. Se detecta automáticamente como inquilino (por wallet).</div>
+      </div>
+      <div class="connector-v"></div>
+
+      <div class="node state-created">
+        <div class="node-tag">Estado: Created</div>
+        <div class="node-title">Fondea la garantía</div>
+        <div class="node-desc">Envía el monto exacto en AVAX al contrato. La transacción bloquea los fondos en el escrow.</div>
+        <div class="node-actions">
+          <span class="chip action">fund() — envía AVAX</span>
+        </div>
+      </div>
+      <div class="connector-v"></div>
+
+      <div class="node state-funded">
+        <div class="node-tag">Estado: Funded</div>
+        <div class="node-title">Garantía activa</div>
+        <div class="node-desc">
+          Los fondos están bloqueados mientras dure el alquiler.
+          Puede cancelar dentro de la ventana de cancelación, o reclamar si el contrato expiró sin propuesta.
+        </div>
+        <div class="node-actions">
+          <span class="chip danger">cancel() — dentro de ventana</span>
+          <span class="chip">reclaimExpired() — si venció</span>
+        </div>
+      </div>
+      <div class="connector-v"></div>
+
+      <div class="node state-proposed">
+        <div class="node-tag">Estado: DistributionProposed</div>
+        <div class="node-title">Recibe propuesta del propietario</div>
+        <div class="node-desc">
+          Ve el breakdown de la distribución con barra visual (SplitBar).
+          Tiene 7 días para responder. Countdown visible.
+        </div>
+        <div class="node-actions">
+          <span class="chip success">accept()</span>
+          <span class="chip danger">reject() — abre disputa</span>
+        </div>
+      </div>
+      <div class="connector-v"></div>
+
+      <div class="arrow-label">↙ acepta &nbsp;&nbsp;&nbsp;&nbsp; rechaza ↘</div>
+      <div class="branch-container">
+
+        <div class="branch">
+          <div class="node state-funded">
+            <div class="node-tag">Acepta propuesta</div>
+            <div class="node-title">Estado: Completed</div>
+            <div class="node-desc">Retira su parte según lo acordado.</div>
+            <div class="node-actions"><span class="chip success">withdraw()</span></div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <div class="node state-disputed">
+            <div class="node-tag">Rechaza propuesta</div>
+            <div class="node-title">Estado: Disputed</div>
+            <div class="node-desc">
+              Ve el contador de 30 días para que el árbitro resuelva.
+              Si el árbitro no actúa a tiempo, puede ejecutar el timeout.
+            </div>
+            <div class="node-actions">
+              <span class="chip warn">executeArbitratorTimeout() — tras 30d</span>
+            </div>
+          </div>
+          <div class="connector-v" style="min-height:16px"></div>
+          <div class="node state-funded">
+            <div class="node-tag">Árbitro resuelve</div>
+            <div class="node-title">Estado: Completed</div>
+            <div class="node-desc">Retira la parte asignada por el árbitro.</div>
+            <div class="node-actions"><span class="chip success">withdraw()</span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FLUJO ÁRBITRO -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-label">Flujo completo</div>
+    <div class="section-title">Árbitro (Arbitrator)</div>
+    <p class="section-desc">
+      El árbitro es asignado al momento de crear el contrato. Solo interviene si hay disputa. Tiene 30 días para resolverla.
+    </p>
+
+    <div class="flow">
+
+      <div class="node start">
+        <div class="node-title">Ingresa a /contract/[address]</div>
+      </div>
+      <div class="connector-v"></div>
+
+      <div class="arrow-label">Sin disputa ↙ &nbsp;&nbsp;&nbsp;&nbsp; Con disputa ↘</div>
+      <div class="branch-container">
+
+        <div class="branch">
+          <div class="node state-funded">
+            <div class="node-tag">Sin disputa activa</div>
+            <div class="node-title">Vista informativa</div>
+            <div class="node-desc">
+              Ve un badge verde "Sin disputa". Muestra wallet del propietario e inquilino.
+              Link al contrato en Snowtrace. Sin acciones disponibles.
+            </div>
+          </div>
+        </div>
+
+        <div class="branch">
+          <div class="node state-disputed">
+            <div class="node-tag">Estado: Disputed</div>
+            <div class="node-title">Disputa activa</div>
+            <div class="node-desc">
+              Ve la propuesta original del propietario.
+              Countdown de 30 días desde que se abrió la disputa.
+              Ingresa montos para propietario e inquilino (deben sumar el depósito total).
+            </div>
+            <div class="node-actions">
+              <span class="chip action">resolve(tenantAmt, landlordAmt)</span>
+            </div>
+          </div>
+          <div class="connector-v" style="min-height:16px"></div>
+          <div class="node state-funded">
+            <div class="node-tag">Resolución enviada</div>
+            <div class="node-title">Estado: Completed</div>
+            <div class="node-desc">Fondos distribuidos según lo resuelto. Cada parte retira con withdraw().</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- DATOS Y FUENTES -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-label">Arquitectura de datos</div>
+    <div class="section-title">Fuentes de información</div>
+    <p class="section-desc">La app combina datos on-chain (Avalanche Fuji) con metadata off-chain (Supabase).</p>
+
+    <div class="screens-grid">
+      <div class="screen-card">
+        <div class="screen-name">On-chain (wagmi / viem)</div>
+        <p class="screen-desc">Datos autoritativos del smart contract en Avalanche Fuji Testnet.</p>
+        <div class="states-list">
+          <div class="state-item funded">Estado del contrato (0–5)</div>
+          <div class="state-item funded">Wallets: tenant, landlord, arbitrator</div>
+          <div class="state-item funded">Monto del depósito en AVAX</div>
+          <div class="state-item funded">Deadline del contrato</div>
+          <div class="state-item funded">Propuesta (montos + timestamps)</div>
+          <div class="state-item funded">Allocations para withdraw</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-name">Off-chain (Supabase)</div>
+        <p class="screen-desc">Metadata legible guardada al crear el contrato. No reemplaza la blockchain.</p>
+        <div class="states-list">
+          <div class="state-item proposed">Nombre del propietario</div>
+          <div class="state-item proposed">Nombre del inquilino</div>
+          <div class="state-item proposed">Dirección del inmueble (texto)</div>
+          <div class="state-item proposed">Fecha de creación (timestamp)</div>
+          <div class="state-item proposed">Address del contrato (lowercase)</div>
+        </div>
+      </div>
+
+      <div class="screen-card">
+        <div class="screen-name">Factory contract</div>
+        <p class="screen-desc">Contrato factory en Fuji. Registra y lista todos los escrows desplegados.</p>
+        <div class="states-list">
+          <div class="state-item created">getContractsByLandlord(addr, from, to)</div>
+          <div class="state-item created">getContractsByTenant(addr, from, to)</div>
+          <div class="state-item created">deployContract(tenant, amount, days)</div>
+          <div class="state-item created">feeBps — fee del protocolo en basis points</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FOOTER -->
+  <!-- ─────────────────────────────────────────── -->
+  <div style="text-align:center; margin-top:40px;">
+    <p style="font-size:11px; color:#A8A29E;">
+      GarantYa · Aleph Hackathon Mar del Plata · Avalanche Fuji Testnet
+    </p>
+  </div>
+
+</body>
+</html>

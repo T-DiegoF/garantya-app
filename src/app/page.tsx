@@ -14,6 +14,90 @@ import { useT } from "@/contexts/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { PropertyMap } from "@/components/PropertyMap";
 
+const STEP_ICONS = [
+  // House
+  <svg key="house" width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <path d="M2 9l7-7 7 7M4 7.5V16h4v-4h2v4h4V7.5" stroke="#A07850" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>,
+  // Lock
+  <svg key="lock" width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <rect x="3" y="8" width="12" height="8" rx="2" stroke="#A07850" strokeWidth="1.5" />
+    <path d="M6 8V6a3 3 0 0 1 6 0v2" stroke="#A07850" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="9" cy="12" r="1.2" fill="#A07850" />
+  </svg>,
+  // Handshake / check
+  <svg key="check" width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <path d="M3 9.5l4 4 8-8" stroke="#A07850" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>,
+];
+
+function HowItWorks() {
+  const { t } = useT();
+
+  return (
+    <div className="space-y-6 pt-2">
+      {/* Section title */}
+      <div>
+        <p className="screen-tag">{t.home.howTitle}</p>
+      </div>
+
+      {/* Steps */}
+      <div className="space-y-3">
+        {t.home.howSteps.map((step, i) => (
+          <div key={i} className="card flex items-start gap-4">
+            <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-[#F5F0E8] border border-[#E5DFD5] flex items-center justify-center">
+              {STEP_ICONS[i]}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-stone-300 tabular-nums">0{i + 1}</span>
+                <p className="text-sm font-bold text-[#1C1917]">{step.title}</p>
+              </div>
+              <p className="text-xs text-stone-400 leading-relaxed mt-0.5">{step.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Avalanche block */}
+      <div className="card space-y-4">
+        {/* Header */}
+        <div className="flex items-center gap-2.5">
+          <svg width="22" height="22" viewBox="0 0 254 254" fill="none" aria-label="Avalanche">
+            <circle cx="127" cy="127" r="127" fill="#E84142" />
+            <path d="M155.5 155.5H176l-49-84-49 84h20.5l28.5-49 28.5 49Z" fill="white" />
+            <path d="M96 155.5H75.5l51.5-89 8 13.8L96 155.5Z" fill="white" opacity="0.6" />
+          </svg>
+          <p className="text-sm font-bold text-[#1C1917]">{t.home.avalancheTitle}</p>
+        </div>
+
+        {/* Stats 1x3 */}
+        <div className="grid grid-cols-3 gap-2">
+          {t.home.avalancheStats.map((s) => (
+            <div key={s.value} className="text-center rounded-xl bg-[#F5F0E8] border border-[#E5DFD5] py-2 px-1">
+              <p className="text-sm font-black text-[#1C1917] tabular-nums">{s.value}</p>
+              <p className="text-[9px] text-stone-400 mt-0.5 leading-tight">{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Snowtrace link */}
+        <a
+          href={`https://43113.testnet.snowtrace.io/address/${FACTORY_ADDRESS}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between text-xs text-stone-400 hover:text-[#A07850] transition-colors"
+        >
+          <span>{t.home.avalancheLink}</span>
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+            <path d="M2.5 2.5h6v6M2.5 8.5l6-6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const router  = useRouter();
   const { address, isConnected } = useAccount();
@@ -49,6 +133,13 @@ export default function HomePage() {
   const fee     = feeBpsBigInt ? (amountWei * feeBpsBigInt) / 10000n : 0n;
   const deposit = amountWei - fee;
 
+  const NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ]+\s[A-Za-zÀ-ÖØ-öø-ÿ]+$/;
+
+  function isValidName(name: string): boolean {
+    const trimmed = name.trim();
+    return NAME_REGEX.test(trimmed) && trimmed.length <= 50;
+  }
+
   function validate(): boolean {
     const e: Record<string, string> = {};
     if (!landlord || !/^0x[a-fA-F0-9]{40}$/.test(landlord))
@@ -61,6 +152,10 @@ export default function HomePage() {
     const a = Number.parseFloat(amount);
     if (Number.isNaN(a) || a < 0.01 || a > 100)
       e.amount = t.home.errors.amount;
+    if (!isValidName(landlordName))
+      e.landlordName = t.home.errors.invalidName;
+    if (!isValidName(tenantName))
+      e.tenantName = t.home.errors.invalidName;
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -88,19 +183,21 @@ export default function HomePage() {
 
       if (createdLog) {
         setContractAddress(createdLog.address);
-        await supabase.from("contracts").insert({
-          address:          createdLog.address,
+        const { error: dbError } = await supabase.from("contracts").upsert({
+          address:          createdLog.address.toLowerCase(),
           property_address: propertyAddress,
           landlord_name:    landlordName,
           tenant_name:      tenantName,
-        });
+        }, { onConflict: "address" });
+        if (dbError) console.error("[GarantYa] Supabase insert error:", dbError);
       }
 
       setTimeout(() => {
         window.dispatchEvent(new Event("navigationstart"));
-        router.push(`/mis-contratos`);
+        router.push(`/contracts`);
       }, 5000);
     } catch (err: unknown) {
+      console.error("[GarantYa] Deploy error:", err);
       const msg = err instanceof Error ? err.message : "Unknown error";
       setErrors({ submit: msg.includes("rejected") ? t.home.errors.rejected : t.home.errors.createFailed });
     } finally {
@@ -145,8 +242,8 @@ export default function HomePage() {
           <div className="card space-y-3">
             <div className="w-9 h-9 rounded-xl bg-[#A07850] flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="6" cy="7" r="3.5" stroke="#F5F0E8" strokeWidth="1.5" />
-                <path d="M9 7h5M12 5v4" stroke="#F5F0E8" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="8" cy="5" r="3" stroke="#F5F0E8" strokeWidth="1.5" />
+                <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#F5F0E8" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </div>
             <div>
@@ -232,13 +329,13 @@ export default function HomePage() {
         </button>
 
         <Link
-          href="/mis-contratos"
+          href="/contracts"
           className="card space-y-3 hover:border-stone-300 transition-all duration-150"
         >
           <div className="w-9 h-9 rounded-xl bg-stone-100 flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <circle cx="6" cy="7" r="3.5" stroke="#1C1917" strokeWidth="1.5" />
-              <path d="M9 7h5M12 5v4" stroke="#1C1917" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="8" cy="5" r="3" stroke="#1C1917" strokeWidth="1.5" />
+              <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#1C1917" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </div>
           <div>
@@ -247,6 +344,9 @@ export default function HomePage() {
           </div>
         </Link>
       </div>
+
+      {/* How it works + stats — only when no role selected */}
+      {!role && <HowItWorks />}
 
       {/* Create contract form */}
       {role === "landlord" && <>
@@ -280,16 +380,18 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Input
-              label="Tu nombre"
-              placeholder="Nombre arrendador"
+              label={t.home.landlordNameLabel}
+              placeholder={t.home.landlordPlaceholder}
               value={landlordName}
               onChange={e => setLandlordName(e.target.value)}
+              error={errors.landlordName}
             />
             <Input
-              label="Nombre inquilino"
-              placeholder="Nombre inquilino"
+              label={t.home.tenantNameLabel}
+              placeholder={t.home.tenantPlaceholder}
               value={tenantName}
               onChange={e => setTenantName(e.target.value)}
+              error={errors.tenantName}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">

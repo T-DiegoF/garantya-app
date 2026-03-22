@@ -39,10 +39,10 @@ export function Nav() {
         <div className="flex items-center gap-3">
           {isConnected && (
             <>
-              <Link href="/mis-contratos" className="text-sm font-bold text-stone-500 hover:text-[#1C1917] transition-colors">
+              <Link href="/contracts" className="text-sm font-bold text-stone-500 hover:text-[#1C1917] transition-colors">
                 {t.nav.myContracts}
               </Link>
-              <ConnectButton showBalance={false} chainStatus="icon" accountStatus="avatar" />
+              <ConnectButton showBalance={{ smallScreen: false, largeScreen: true }} chainStatus="icon" accountStatus="avatar" />
             </>
           )}
 

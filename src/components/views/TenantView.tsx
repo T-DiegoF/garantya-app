@@ -16,15 +16,17 @@ import {
 import type { useEscrow } from "@/lib/hooks/useEscrow";
 import { useT } from "@/contexts/LanguageContext";
 import { logger } from "@/lib/logger";
+import type { ContractMetadata } from "@/lib/supabase";
 
 type EscrowData = ReturnType<typeof useEscrow>;
 
 interface TenantViewProps {
   address: Address;
   escrow: EscrowData;
+  meta?: ContractMetadata;
 }
 
-export function TenantView({ address, escrow }: TenantViewProps) {
+export function TenantView({ address, escrow, meta }: TenantViewProps) {
   const {
     landlord, arbitrator, state, expectedDeposit, deposit,
     deadline, cancelDeadline, proposal,
@@ -95,7 +97,18 @@ export function TenantView({ address, escrow }: TenantViewProps) {
 
       {/* Info */}
       <div className="card space-y-0">
-        <DataRow label={t.common.landlord}   value={shortenAddress(landlord!)}  mono />
+        <DataRow
+          label={t.common.landlord}
+          value={
+            meta?.landlord_name ? (
+              <div className="text-right">
+                <p className="text-sm font-bold text-[#1C1917]">{meta.landlord_name}</p>
+                <p className="text-[11px] font-mono text-stone-400 mt-0.5">{shortenAddress(landlord!)}</p>
+              </div>
+            ) : shortenAddress(landlord!)
+          }
+          mono={!meta?.landlord_name}
+        />
         <DataRow label={t.common.arbitrator} value={shortenAddress(arbitrator!)} mono />
         {deadline && (
           <DataRow

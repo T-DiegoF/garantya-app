@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GarantYa — Flujos con pantallas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#e2ddd6;color:#1C1917;padding:40px 24px 100px;-webkit-font-smoothing:antialiased;min-width:max-content}
+
+/* ── Page header ── */
+.page-h1{font-size:28px;font-weight:900;letter-spacing:-.03em;margin-bottom:4px}
+.page-sub{color:#78716C;font-size:13px;margin-bottom:52px}
+
+/* ── Flow section ── */
+.flow-section{margin-bottom:72px}
+.flow-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#A8A29E;margin-bottom:6px}
+.flow-section-title{font-size:20px;font-weight:900;margin-bottom:20px}
+
+/* ── Horizontal scrollable flow row ── */
+.flow-row{display:flex;align-items:center;gap:0;padding-bottom:12px;padding-top:4px}
+
+/* ── Horizontal arrow ── */
+.h-arrow{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;padding:0 4px;min-width:72px}
+.h-arrow-lbl{font-size:9px;font-weight:700;color:#78716C;text-align:center;max-width:72px;line-height:1.35}
+.h-arrow-line{display:flex;align-items:center;width:64px}
+.h-arrow-dash{flex:1;height:2px;background:#C4B5A5;border-radius:1px}
+.h-arrow-tip{color:#C4B5A5;font-size:14px;margin-left:-2px;line-height:1}
+/* role colors */
+.h-arrow.system .h-arrow-lbl{color:#1C1917}
+.h-arrow.system .h-arrow-dash{background:#1C1917}
+.h-arrow.system .h-arrow-tip{color:#1C1917}
+.h-arrow.landlord .h-arrow-lbl{color:#78350F}
+.h-arrow.landlord .h-arrow-dash{background:#F59E0B}
+.h-arrow.landlord .h-arrow-tip{color:#F59E0B}
+.h-arrow.tenant .h-arrow-lbl{color:#92400E}
+.h-arrow.tenant .h-arrow-dash{background:#A07850}
+.h-arrow.tenant .h-arrow-tip{color:#A07850}
+.h-arrow.arbitrator .h-arrow-lbl{color:#5B21B6}
+.h-arrow.arbitrator .h-arrow-dash{background:#7C3AED}
+.h-arrow.arbitrator .h-arrow-tip{color:#7C3AED}
+
+/* ── Branch section (below a screen) ── */
+.branch-section{display:flex;gap:0;align-items:flex-start;margin-top:0;padding-left:187px}
+.branch-connector{display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0;padding-top:0}
+.branch-v-line{width:2px;height:32px;background:#C4B5A5}
+.branch-h-row{display:flex;align-items:flex-start;gap:20px}
+.branch-col{display:flex;flex-direction:column;align-items:center;gap:0}
+.branch-v-arrow{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0}
+.branch-v-lbl{font-size:9px;font-weight:700;text-align:center;max-width:80px;line-height:1.3}
+.branch-v-sym{font-size:18px;line-height:1;color:#C4B5A5}
+.branch-col.accept .branch-v-lbl{color:#166534}
+.branch-col.accept .branch-v-sym{color:#22C55E}
+.branch-col.reject .branch-v-lbl{color:#991B1B}
+.branch-col.reject .branch-v-sym{color:#EF4444}
+.branch-col.arb .branch-v-lbl{color:#5B21B6}
+.branch-col.arb .branch-v-sym{color:#7C3AED}
+
+/* ── Branch header pill ── */
+.branch-pill{font-size:10px;font-weight:800;padding:3px 10px;border-radius:100px;margin-bottom:6px;display:inline-block}
+.pill-accept{background:#DCFCE7;color:#166534}
+.pill-reject{background:#FEE2E2;color:#991B1B}
+
+/* ── Screen label (above each phone) ── */
+.phone-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.screen-num{font-size:10px;font-weight:700;color:#A8A29E;text-align:center;margin-bottom:6px}
+
+/* ── Legend ── */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:36px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#57534E}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ══════════════════ PHONE DESIGN SYSTEM ══════════════════ */
+.phone{display:flex;flex-direction:column;width:340px;border-radius:28px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.08);background:#F5F0E8;flex-shrink:0}
+.phone.mini{width:240px;opacity:.7}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:50;width:100%;border-bottom:1px solid #E0D9CE;background:rgba(245,240,232,.95);backdrop-filter:blur(4px)}
+.nav-inner{display:flex;height:52px;align-items:center;justify-content:space-between;padding:0 14px}
+.logo-wrap{display:flex;align-items:center;gap:5px}
+.logo-text{font-size:13px;font-weight:900;letter-spacing:-.03em;color:#1C1917}
+.logo-dot{width:6px;height:6px;border-radius:50%;background:#A07850;flex-shrink:0}
+.nav-right{display:flex;align-items:center;gap:8px}
+.wallet-btn{background:white;border:1.5px solid #E5DFD5;border-radius:9px;padding:5px 9px;font-size:10px;font-weight:700;color:#1C1917;display:flex;align-items:center;gap:5px}
+.connect-btn{background:#1C1917;color:#F5F0E8;font-size:10px;font-weight:700;padding:6px 12px;border-radius:9px;border:none}
+.avatar{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#A07850,#1C1917);flex-shrink:0}
+.nav-link{font-size:11px;font-weight:700;color:#78716C;white-space:nowrap}
+.lang-btn{display:flex;align-items:center;gap:3px;border:1.5px solid #E5DFD5;background:white;border-radius:7px;padding:4px 7px;font-size:9px;font-weight:700;color:#78716C}
+
+/* Content */
+.content{flex:1;padding:20px 14px;background:#F5F0E8}
+
+/* Footer */
+.footer{background:#1C1917;padding:12px 14px}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.footer-left{display:flex;align-items:center;gap:10px}
+.footer-logo{font-size:11px;font-weight:900;color:#F5F0E8}
+.aleph-badge{display:inline-flex;align-items:center;gap:3px;background:#111;border:1px solid #44403C;border-radius:3px;padding:2px 5px}
+.aleph-w{font-size:8px;font-weight:900;letter-spacing:.07em;color:#fff}
+.aleph-r{font-size:8px;font-weight:900;letter-spacing:.07em;color:#E8431E}
+.footer-copy{font-size:9px;color:#44403C}
+
+/* ── Design system ── */
+.card{background:white;border:1.5px solid #E5DFD5;border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(28,25,23,.04),0 4px 16px rgba(28,25,23,.05)}
+.card.amber{background:#FFFBEB;border-color:#FDE68A}
+.card.red{background:#FFF1F2;border-color:#FCA5A5}
+.card.green{background:#F0FDF4;border-color:#86EFAC}
+.stag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:#A8A29E;margin-bottom:10px}
+.divider{border-top:1px solid #EDE7DC;margin:12px 0}
+.amount-hero{font-size:40px;font-weight:900;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:3px 8px;border-radius:100px}
+.badge.green{background:#DCFCE7;color:#166534}
+.badge.amber{background:#FEF3C7;color:#92400E}
+.badge.red{background:#FEE2E2;color:#991B1B}
+.badge.gray{background:#F1F5F9;color:#475569}
+.bpulse{width:5px;height:5px;border-radius:50%;background:currentColor}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer}
+.btn.primary{background:#1C1917;color:#F5F0E8}
+.btn.success{background:#16A34A;color:white}
+.btn.danger{background:#DC2626;color:white}
+.btn.outline{background:white;color:#1C1917;border:1.5px solid #E5DFD5}
+.input-wrap{display:flex;flex-direction:column;gap:4px}
+.input-label{font-size:10px;font-weight:700;color:#57534E;text-transform:uppercase;letter-spacing:.05em}
+.input-field{width:100%;padding:8px 10px;border:1.5px solid #E5DFD5;border-radius:9px;font-size:12px;font-family:inherit;background:white;color:#1C1917}
+.input-field::placeholder{color:#C4B5A5}
+.input-field.mono{font-family:monospace}
+.dr{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F5F0E8}
+.dr:last-child{border-bottom:none}
+.dr-l{font-size:11px;color:#78716C}
+.dr-v{font-size:11px;font-weight:600;color:#1C1917;font-family:monospace}
+.dr-v.acc{color:#A07850;font-weight:700;font-family:inherit}
+.dr-v.nb{text-align:right}
+.nm{font-size:12px;font-weight:700;color:#1C1917;display:block;font-family:inherit}
+.na{font-size:9px;color:#A8A29E;display:block;font-family:monospace;margin-top:1px}
+.cdown-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#A8A29E;margin-bottom:6px}
+.cdown-bar{height:5px;background:#F5F0E8;border-radius:100px;overflow:hidden;margin-bottom:7px}
+.cdown-fill{height:100%;border-radius:100px;background:#A07850}
+.cdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
+.cdown-cell{background:#F5F0E8;border-radius:7px;padding:5px 3px;text-align:center}
+.cdown-num{font-size:14px;font-weight:900;color:#1C1917;line-height:1}
+.cdown-unit{font-size:8px;color:#A8A29E;margin-top:1px}
+.split-bar{height:7px;border-radius:100px;overflow:hidden;display:flex;margin:3px 0 10px}
+.sp-t{background:#A07850}
+.sp-l{background:#E5DFD5}
+.tenant-chip{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;color:#57534E;background:#F1F5F9;border-radius:100px;padding:2px 7px}
+.state-pill{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border-radius:100px}
+.p-gray{background:#F1F5F9;color:#64748B}
+.p-green{background:#DCFCE7;color:#166534}
+.p-amber{background:#FEF3C7;color:#92400E}
+.p-red{background:#FEE2E2;color:#991B1B}
+.share-btns{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.share-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border:1.5px solid #E5DFD5;border-radius:10px;font-size:11px;font-weight:700;color:#1C1917;background:white}
+.qr-box{width:110px;height:110px;background:white;border-radius:10px;border:1px solid #FDE68A;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.qr-inner{width:82px;height:82px;background:#1C1917;border-radius:3px;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:2px;padding:5px}
+.qc{background:#F5F0E8;border-radius:1px}
+.qb{background:#1C1917}
+.step-card{display:flex;align-items:flex-start;gap:10px;background:white;border:1.5px solid #E5DFD5;border-radius:13px;padding:12px 13px}
+.step-icon{width:32px;height:32px;border-radius:10px;background:#F5F0E8;border:1.5px solid #E5DFD5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-num{font-size:8px;font-weight:900;color:#D6D3D1}
+.step-ttl{font-size:11px;font-weight:700;color:#1C1917}
+.step-desc{font-size:10px;color:#78716C;line-height:1.5;margin-top:2px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
+.stat-cell{background:#F5F0E8;border:1.5px solid #E5DFD5;border-radius:9px;padding:7px 3px;text-align:center}
+.stat-val{font-size:12px;font-weight:900;color:#1C1917}
+.stat-lbl{font-size:7px;color:#A8A29E;margin-top:2px;line-height:1.3}
+.avax-circle{width:20px;height:20px;border-radius:50%;background:#E84142;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.success-icon{width:56px;height:56px;border-radius:18px;background:#1C1917;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.empty-icon{width:44px;height:44px;border-radius:14px;background:#F5F0E8;border:1.5px solid #E5DFD5;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.contract-card{background:white;border:1.5px solid #E5DFD5;border-radius:14px;padding:14px}
+.contract-meta{display:flex;align-items:center;gap:5px;margin-top:9px;padding-top:9px;border-top:1px solid #F5F0E8;flex-wrap:wrap}
+.meta-sep{color:#E0D9CE;font-size:9px}
+.meta-date{font-size:9px;color:#A8A29E}
+.alert-banner{display:flex;align-items:flex-start;gap:8px;background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:13px;padding:12px}
+.alert-title{font-size:12px;font-weight:700;color:#78350F}
+.alert-desc{font-size:10px;color:#92400E;margin-top:2px;line-height:1.4}
+.fee-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0}
+.avax-chain-link{font-size:10px;color:#A8A29E;text-decoration:underline}
+
+/* Map placeholder */
+.map-frame{width:100%;height:140px;border-radius:10px;border:1.5px solid #E5DFD5;overflow:hidden;margin-top:6px}
+.map-frame iframe{width:100%;height:100%;border:none;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="page-h1">GarantYa — Flujos con pantallas reales</div>
+<p class="page-sub">Flechas = acciones · 4 flujos · 18 pantallas · Avalanche Fuji Testnet</p>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1C1917"></div>Sistema / automático</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Acción del propietario</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#A07850"></div>Acción del inquilino</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7C3AED"></div>Acción del árbitro</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FLUJO 1: INICIO
+══════════════════════════════════════ -->
+<div class="flow-section">
+  <div class="flow-section-label">Flujo 1</div>
+  <div class="flow-section-title">Inicio y creación de contrato</div>
+
+  <div class="flow-row">
+
+    <!-- S1: No conectado -->
+    <div class="phone-wrap">
+      <div class="screen-num">1 · No conectado</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner">
+          <div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div>
+          <div class="nav-right"><div class="lang-btn"><span>🇦🇷</span><span>es</span></div></div>
+        </div></div>
+        <div class="content">
+          <div style="display:inline-flex;align-items:center;gap:5px;border:1.5px solid #E5DFD5;background:white;padding:5px 10px;border-radius:100px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E"><span style="width:5px;height:5px;border-radius:50%;background:#4ADE80;display:inline-block"></span>Avalanche · Testnet</div>
+          <div style="font-size:38px;font-weight:900;letter-spacing:-.04em;line-height:1.0;margin:12px 0 6px">Depósito de garantía,<br><span style="color:#A07850">protegido en blockchain.</span></div>
+          <p style="font-size:13px;color:#78716C;line-height:1.6;margin-bottom:18px">Sin escribanos. Sin inmobiliarias. Solo código.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+            <div class="card" style="padding:14px"><div style="width:32px;height:32px;border-radius:10px;background:#1C1917;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8v6H2V8L8 2z" stroke="#F5F0E8" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">Propietario</div><div style="font-size:10px;color:#57534E;margin-top:2px">Creá el contrato y fijá los términos.</div></div>
+            <div class="card" style="padding:14px"><div style="width:32px;height:32px;border-radius:10px;background:#A07850;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#F5F0E8" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#F5F0E8" stroke-width="1.5" stroke-linecap="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">Inquilino</div><div style="font-size:10px;color:#57534E;margin-top:2px">Depositá y recuperá tu garantía.</div></div>
+          </div>
+          <button class="btn primary" style="margin-bottom:8px;font-size:13px;padding:13px">Comenzar →</button>
+          <p style="font-size:10px;color:#A8A29E;text-align:center">Sin custodia. Sin intermediarios.</p>
+        </div>
+        <div class="footer"><div class="footer-inner"><div class="footer-left"><span class="footer-logo">GarantYa</span><div class="aleph-badge"><span class="aleph-w">ALEPH</span><span class="aleph-r">HACKATHON</span></div></div><span class="footer-copy">© 2025 GarantYa</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow system"><div class="h-arrow-lbl">Conectar wallet</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- S2: Conectado sin rol -->
+    <div class="phone-wrap">
+      <div class="screen-num">2 · Conectado — elegir rol</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner">
+          <div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div>
+          <div class="nav-right"><span class="nav-link">Mis contratos</span><div class="wallet-btn"><div class="avatar"></div><span>0x4f2a...3b8c</span></div></div>
+        </div></div>
+        <div class="content">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
+            <div class="card" style="padding:14px"><div style="width:32px;height:32px;border-radius:10px;background:#F5F0E8;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8v6H2V8L8 2z" stroke="#1C1917" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">Propietario</div><div style="font-size:10px;color:#57534E;margin-top:2px">Crear un contrato</div></div>
+            <div class="card" style="padding:14px"><div style="width:32px;height:32px;border-radius:10px;background:#F5F0E8;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#1C1917" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#1C1917" stroke-width="1.5" stroke-linecap="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">Inquilino</div><div style="font-size:10px;color:#57534E;margin-top:2px">Ver mis contratos →</div></div>
+          </div>
+          <div class="stag" style="margin-top:4px">Cómo funciona</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="step-card"><div class="step-icon"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M2 9l7-7 7 7M4 7.5V16h4v-4h2v4h4V7.5" stroke="#A07850" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div style="display:flex;align-items:center;gap:5px"><span class="step-num">01</span><span class="step-ttl">El propietario crea el contrato</span></div><p class="step-desc">Define el monto, el plazo y la wallet del inquilino. Sin papeles.</p></div></div>
+            <div class="step-card"><div class="step-icon"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><rect x="3" y="8" width="12" height="8" rx="2" stroke="#A07850" stroke-width="1.5"/><path d="M6 8V6a3 3 0 0 1 6 0v2" stroke="#A07850" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="12" r="1.2" fill="#A07850"/></svg></div><div><div style="display:flex;align-items:center;gap:5px"><span class="step-num">02</span><span class="step-ttl">El inquilino deposita la garantía</span></div><p class="step-desc">Los fondos quedan bloqueados. Nadie los mueve solo.</p></div></div>
+            <div class="step-card"><div class="step-icon"><svg width="16" height="16" viewBox="0 0 18 18" fill="none"><path d="M3 9.5l4 4 8-8" stroke="#A07850" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div style="display:flex;align-items:center;gap:5px"><span class="step-num">03</span><span class="step-ttl">Ambos acuerdan al finalizar</span></div><p class="step-desc">El propietario propone la distribución. El inquilino acepta o disputa.</p></div></div>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px"><div class="avax-circle"><svg width="10" height="10" viewBox="0 0 254 254" fill="none"><circle cx="127" cy="127" r="127" fill="#E84142"/><path d="M155.5 155.5H176l-49-84-49 84h20.5l28.5-49 28.5 49Z" fill="white"/></svg></div><span style="font-size:11px;font-weight:700">Construido sobre Avalanche Fuji Testnet</span></div>
+            <div class="stats-grid"><div class="stat-cell"><div class="stat-val">~1s</div><div class="stat-lbl">finalidad de transacción</div></div><div class="stat-cell"><div class="stat-val">&lt;$0.01</div><div class="stat-lbl">costo por operación</div></div><div class="stat-cell"><div class="stat-val">99.9%</div><div class="stat-lbl">disponibilidad</div></div></div>
+            <div style="margin-top:8px;font-size:10px;color:#A8A29E">Ver factory en Snowtrace →</div>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><div class="footer-left"><span class="footer-logo">GarantYa</span><div class="aleph-badge"><span class="aleph-w">ALEPH</span><span class="aleph-r">HACKATHON</span></div></div><span class="footer-copy">© 2025 GarantYa</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow landlord"><div class="h-arrow-lbl">Elige Propietario</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- S3: Formulario propietario CON MAPA -->
+    <div class="phone-wrap">
+      <div class="screen-num">3 · Propietario — Crear contrato</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner">
+          <div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div>
+          <div class="nav-right"><div class="wallet-btn"><div class="avatar"></div><span style="font-size:9px">0.98 AVAX</span></div></div>
+        </div></div>
+        <div class="content">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+            <div class="card" style="padding:12px;border-color:#1C1917;box-shadow:0 0 0 1px #1C1917"><div style="width:30px;height:30px;border-radius:9px;background:#1C1917;display:flex;align-items:center;justify-content:center;margin-bottom:7px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8v6H2V8L8 2z" stroke="#F5F0E8" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">Propietario</div><div style="font-size:10px;color:#57534E;margin-top:2px">Crear un contrato</div></div>
+            <div class="card" style="padding:12px"><div style="width:30px;height:30px;border-radius:9px;background:#F5F0E8;display:flex;align-items:center;justify-content:center;margin-bottom:7px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#1C1917" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#1C1917" stroke-width="1.5" stroke-linecap="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">Inquilino</div><div style="font-size:10px;color:#57534E;margin-top:2px">Ver mis contratos →</div></div>
+          </div>
+          <div class="stag">nuevo contrato</div>
+          <h2 style="font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:3px">Crear contrato</h2>
+          <p style="font-size:11px;color:#78716C;margin-bottom:14px">El depósito queda bloqueado hasta que ambas partes acuerden.</p>
+          <div class="card" style="display:flex;flex-direction:column;gap:11px">
+            <div class="input-wrap"><label class="input-label">Wallet del inquilino</label><input class="input-field mono" placeholder="0x..." value="0xAb12...ef34"/></div>
+            <div>
+              <div class="input-wrap"><label class="input-label">Dirección del inmueble</label><input class="input-field" value="Av. Corrientes 1234, CABA"/></div>
+              <!-- MAPA REAL OpenStreetMap -->
+              <div class="map-frame"><iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-58.3896,-34.6117,-58.3736,-34.5957&layer=mapnik&marker=-34.6037,-58.3816" title="Ubicación del inmueble" loading="lazy"></iframe></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="input-wrap"><label class="input-label">Tu nombre y apellido</label><input class="input-field" value="Juan García"/></div>
+              <div class="input-wrap"><label class="input-label">Nombre y apellido inquilino</label><input class="input-field" value="María López"/></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="input-wrap"><label class="input-label">Duración (días)</label><input class="input-field" value="365"/></div>
+              <div class="input-wrap"><label class="input-label">Garantía (AVAX)</label><input class="input-field" value="0.5"/></div>
+            </div>
+            <div class="divider"></div>
+            <div>
+              <div class="fee-row"><span style="font-size:11px;color:#A8A29E">Comisión (1%)</span><span style="font-size:11px;font-family:monospace;font-weight:700;color:#78716C">0.00500000 AVAX</span></div>
+              <div class="fee-row"><span style="font-size:11px;color:#57534E;font-weight:600">Depósito efectivo</span><span style="font-size:13px;font-weight:900;color:#A07850;font-variant-numeric:tabular-nums">0.49500000 AVAX</span></div>
+            </div>
+            <button class="btn primary">Crear y bloquear depósito →</button>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><div class="footer-left"><span class="footer-logo">GarantYa</span></div><span class="footer-copy">© 2025 GarantYa</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow system"><div class="h-arrow-lbl">Confirmar en wallet</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- S4: Success -->
+    <div class="phone-wrap">
+      <div class="screen-num">4 · Contrato creado</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar"></div><span>0x4f2a...3b8c</span></div></div></div></div>
+        <div class="content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:460px;gap:0">
+          <div class="success-icon" style="margin-bottom:14px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F5F0E8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>
+          <h2 style="font-size:26px;font-weight:900;letter-spacing:-.03em;text-align:center">Contrato creado</h2>
+          <p style="font-size:12px;color:#A8A29E;margin:6px 0 22px;text-align:center">Redirigiendo a tus contratos...</p>
+          <div class="card" style="width:100%">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"><span style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">Transacción</span><span style="font-size:10px;font-family:monospace;color:#78716C;text-decoration:underline">0x7f3a9b2c...4e8d →</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">Contrato</span><span style="font-size:10px;font-family:monospace;color:#78716C;text-decoration:underline">0xD4f0cA12...9b2e →</span></div>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><div class="footer-left"><span class="footer-logo">GarantYa</span></div><span class="footer-copy">© 2025 GarantYa</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow system"><div class="h-arrow-lbl">Redirect 5 seg</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- S5: /contracts -->
+    <div class="phone-wrap">
+      <div class="screen-num">5 · /contracts — Lista</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><span class="nav-link">Mis contratos</span><div class="wallet-btn"><div class="avatar"></div><span>0x4f2a...3b8c</span></div></div></div></div>
+        <div class="content">
+          <div class="alert-banner" style="margin-bottom:13px"><div style="color:#F59E0B;flex-shrink:0;margin-top:1px"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2L14.5 13H1.5L8 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6v3.5M8 11v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div><div><div class="alert-title">Tu inquilino depositó la garantía</div><div class="alert-desc">El depósito está bloqueado. Proponé la distribución al finalizar.</div></div><span style="color:#F59E0B;font-size:12px;flex-shrink:0">→</span></div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:13px"><div><div class="stag" style="margin-bottom:3px">mis contratos</div><h1 style="font-size:24px;font-weight:900;letter-spacing:-.03em;line-height:1">Contratos</h1></div><button class="btn outline" style="width:auto;padding:6px 12px;font-size:11px">+ Nuevo</button></div>
+          <div class="card" style="margin-bottom:13px;padding:12px"><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#A8A29E;margin-bottom:7px">Buscar contrato</div><div style="display:flex;gap:7px"><input class="input-field mono" style="flex:1;font-size:11px;padding:7px 9px" placeholder="0x..."/><button class="btn primary" style="width:auto;padding:7px 12px;font-size:11px">Ir →</button></div></div>
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:9px"><span style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#A8A29E">Propietario</span><span style="font-size:8px;font-weight:700;color:#D6D3D1">2</span></div>
+          <div class="contract-card" style="margin-bottom:9px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:7px"><div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1"><div style="width:28px;height:28px;border-radius:7px;background:#F5F0E8;border:1.5px solid #E5DFD5;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7l5-5 5 5M3 6.5V12h3V9h2v3h3V6.5" stroke="#A07850" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="font-size:12px;font-weight:600;color:#44403C;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Av. Corrientes 1234, CABA</span></div><div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><span class="state-pill p-green">Activo</span><span style="color:#D6D3D1;font-size:12px">→</span></div></div>
+            <div class="contract-meta"><div class="tenant-chip"><svg width="8" height="8" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="3.5" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 9c0-1.933 1.567-3 3.5-3s3.5 1.067 3.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>María López</div><span class="meta-sep">·</span><span class="meta-date"><strong style="color:#57534E">Vence</strong> 15 ene. 2026</span><span class="meta-sep">·</span><span style="font-size:9px;font-weight:700;color:#A8A29E">302d</span></div>
+          </div>
+          <div class="contract-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:7px"><div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1"><div style="width:28px;height:28px;border-radius:7px;background:#F5F0E8;border:1.5px solid #E5DFD5;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M2 7l5-5 5 5M3 6.5V12h3V9h2v3h3V6.5" stroke="#A07850" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span style="font-size:11px;font-weight:600;color:#44403C;font-family:monospace">0xD4f0...9b2e</span></div><div style="display:flex;align-items:center;gap:5px;flex-shrink:0"><span class="state-pill p-gray">Esperando depósito</span><span style="color:#D6D3D1;font-size:12px">→</span></div></div>
+            <div class="contract-meta"><div class="tenant-chip">0xAb12...ef34</div><span class="meta-sep">·</span><span class="meta-date"><strong style="color:#57534E">Creado</strong> 10 mar. 2025</span></div>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><div class="footer-left"><span class="footer-logo">GarantYa</span><div class="aleph-badge"><span class="aleph-w">ALEPH</span><span class="aleph-r">HACKATHON</span></div></div><span class="footer-copy">© 2025 GarantYa</span></div></div>
+      </div>
+    </div>
+
+  </div><!-- end flow-row -->
+
+  <!-- Note: inquilino path -->
+  <div style="margin-top:10px;display:flex;align-items:center;gap:8px;padding-left:12px">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3v8M3 11l4-4" stroke="#A07850" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span style="font-size:11px;color:#A8A29E"><strong style="color:#A07850">Inquilino:</strong> desde pantalla 2 → elige "Inquilino" → va directo a /contracts (pantalla 5)</span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     FLUJO 2: PROPIETARIO
+══════════════════════════════════════ -->
+<div class="flow-section">
+  <div class="flow-section-label">Flujo 2</div>
+  <div class="flow-section-title">Propietario — Ciclo de vida del contrato</div>
+
+  <div class="flow-row">
+
+    <!-- /contracts mini entry -->
+    <div class="phone-wrap">
+      <div class="screen-num">↑ pantalla 5</div>
+      <div class="phone mini">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div></div></div>
+        <div class="content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:10px">
+          <div style="font-size:22px;font-weight:900;letter-spacing:-.03em">Contratos</div>
+          <div class="contract-card" style="width:100%"><div style="font-size:11px;font-weight:600;color:#44403C">Av. Corrientes 1234</div><div style="margin-top:6px"><span class="state-pill p-green">Activo</span></div></div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow landlord"><div class="h-arrow-lbl">Abre contrato</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- L-Created -->
+    <div class="phone-wrap">
+      <div class="screen-num">6 · Esperando depósito</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar"></div><span style="font-size:9px">0.98 AVAX</span></div></div></div></div>
+        <div class="content">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista propietario</div><span class="badge gray"><span class="bpulse"></span>Esperando depósito</span></div>
+          <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Depósito en escrow</p><span class="amount-hero" style="color:#E0D9CE">—</span></div>
+          <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Inquilino</span><div class="dr-v nb"><span class="nm">María López</span><span class="na">0xAb12...ef34</span></div></div><div class="dr"><span class="dr-l">Árbitro</span><span class="dr-v">0x7f3a...9b2c</span></div><div class="dr"><span class="dr-l">Vence el</span><span class="dr-v" style="font-family:inherit">15/01/2026</span></div><div class="dr"><span class="dr-l">Ver en Snowtrace</span><span class="dr-v" style="color:#A07850;text-decoration:underline">0xD4f0...9b2e →</span></div></div>
+          <div class="card amber">
+            <p style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:3px">Esperando depósito del inquilino</p>
+            <p style="font-size:10px;color:#B45309;margin-bottom:12px;line-height:1.5">Compartí este QR o el link con tu inquilino para que deposite la garantía.</p>
+            <div class="qr-box"><div class="qr-inner"><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc"></div><div class="qc"></div><div class="qc qb"></div><div class="qc"></div><div class="qc"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc"></div><div class="qc qb"></div><div class="qc"></div><div class="qc qb"></div><div class="qc"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc"></div><div class="qc qb"></div><div class="qc"></div><div class="qc qb"></div><div class="qc"></div><div class="qc"></div><div class="qc qb"></div><div class="qc"></div><div class="qc qb"></div><div class="qc"></div><div class="qc qb"></div><div class="qc"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div><div class="qc qb"></div></div></div>
+            <p style="font-size:10px;font-family:monospace;color:#B45309;word-break:break-all;text-align:center;margin:6px 0">0xD4f0cA12bE873…</p>
+            <div class="share-btns"><div class="share-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.549 4.12 1.512 5.855L0 24l6.318-1.485A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.007-1.37l-.36-.213-3.727.876.906-3.618-.234-.372A9.783 9.783 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg>WhatsApp</div><div class="share-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>Telegram</div></div>
+            <p style="font-size:10px;color:#B45309;text-align:center;text-decoration:underline;margin-top:7px">Copiar link</p>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow tenant"><div class="h-arrow-lbl">Inquilino deposita</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- L-Funded -->
+    <div class="phone-wrap">
+      <div class="screen-num">7 · Activo — Proponer distribución</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar"></div><span style="font-size:9px">0.98 AVAX</span></div></div></div></div>
+        <div class="content">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista propietario</div><span class="badge green"><span class="bpulse"></span>Activo</span></div>
+          <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Depósito en escrow</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+          <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Inquilino</span><div class="dr-v nb"><span class="nm">María López</span><span class="na">0xAb12...ef34</span></div></div><div class="dr"><span class="dr-l">Árbitro</span><span class="dr-v">0x7f3a...9b2c</span></div><div class="dr"><span class="dr-l">Vence el</span><span class="dr-v" style="font-family:inherit">15/01/2026</span></div></div>
+          <div class="card" style="display:flex;flex-direction:column;gap:10px">
+            <h2 style="font-size:15px;font-weight:900">Proponer distribución</h2>
+            <p style="font-size:11px;color:#78716C;line-height:1.5">Solo podés proponer una vez. El inquilino tiene 7 días para responder.</p>
+            <div class="input-wrap"><label class="input-label">Para el inquilino (AVAX)</label><input class="input-field" value="0.297" type="number" step="0.0001"/></div>
+            <div class="input-wrap"><label class="input-label">Para mí (AVAX)</label><input class="input-field" value="0.198" type="number" step="0.0001"/></div>
+            <p style="font-size:10px;color:#A8A29E">Total disponible: 0.495 AVAX</p>
+            <button class="btn primary">Proponer distribución →</button>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow landlord"><div class="h-arrow-lbl">Propone distribución</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- L-Proposed -->
+    <div class="phone-wrap">
+      <div class="screen-num">8 · Propuesta enviada — esperando respuesta</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar"></div><span style="font-size:9px">0.98 AVAX</span></div></div></div></div>
+        <div class="content">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista propietario</div><span class="badge amber"><span class="bpulse"></span>Propuesta enviada</span></div>
+          <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Depósito en escrow</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+          <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Inquilino</span><div class="dr-v nb"><span class="nm">María López</span><span class="na">0xAb12...ef34</span></div></div><div class="dr"><span class="dr-l">Árbitro</span><span class="dr-v">0x7f3a...9b2c</span></div></div>
+          <div class="card" style="display:flex;flex-direction:column;gap:10px">
+            <h2 style="font-size:15px;font-weight:900">Propuesta enviada</h2>
+            <div><div class="dr"><span class="dr-l">Para el inquilino</span><span class="dr-v acc">0.297 AVAX</span></div><div class="dr"><span class="dr-l">Para mí</span><span class="dr-v" style="font-family:inherit;font-weight:700">0.198 AVAX</span></div><div class="dr"><span class="dr-l">Vence</span><span class="dr-v" style="font-family:inherit;font-weight:700">22/03/2025</span></div></div>
+            <p style="font-size:10px;color:#78716C;line-height:1.5">Esperando respuesta del inquilino. Si no responde en 7 días, la propuesta se auto-acepta.</p>
+            <div class="divider"></div>
+            <p style="font-size:10px;color:#A8A29E;margin-bottom:4px">Si el plazo ya venció:</p>
+            <button class="btn outline" style="font-size:11px">Ejecutar timeout</button>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+  </div><!-- end flow-row propietario -->
+
+  <!-- Branch from Proposed -->
+  <div style="padding-left:1152px;margin-top:-4px;margin-bottom:6px">
+    <div style="display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M7 12l-4-4M7 12l4-4" stroke="#C4B5A5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:10px;color:#A8A29E;font-weight:700">Inquilino responde desde pantalla 8:</span></div>
+  </div>
+  <div style="display:flex;gap:40px;padding-left:1136px;align-items:flex-start">
+
+    <!-- Branch: acepta -->
+    <div class="branch-col accept">
+      <span class="branch-pill pill-accept">✓ Inquilino acepta</span>
+      <div class="branch-v-arrow"><div class="branch-v-lbl">accept()</div><div class="branch-v-sym">↓</div></div>
+      <div class="phone-wrap">
+        <div class="screen-num">9 · Completado — retirar</div>
+        <div class="phone">
+          <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar"></div><span>0x4f2a...3b8c</span></div></div></div></div>
+          <div class="content">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista propietario</div><span class="badge gray">Completado</span></div>
+            <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Depósito en escrow</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+            <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Inquilino</span><div class="dr-v nb"><span class="nm">María López</span><span class="na">0xAb12...ef34</span></div></div><div class="dr"><span class="dr-l">Ver en Snowtrace</span><span class="dr-v" style="color:#A07850;text-decoration:underline">0xD4f0...9b2e →</span></div></div>
+            <div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:10px">Fondos disponibles</h2><div class="dr" style="margin-bottom:10px"><span class="dr-l">Tu parte</span><span class="dr-v acc">0.198 AVAX</span></div><button class="btn primary">Retirar 0.198 AVAX →</button></div>
+          </div>
+          <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Branch: rechaza -->
+    <div class="branch-col reject">
+      <span class="branch-pill pill-reject">✗ Inquilino rechaza</span>
+      <div class="branch-v-arrow"><div class="branch-v-lbl">reject()</div><div class="branch-v-sym">↓</div></div>
+      <div class="phone-wrap">
+        <div class="screen-num">10 · En disputa</div>
+        <div class="phone">
+          <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar"></div><span>0x4f2a...3b8c</span></div></div></div></div>
+          <div class="content">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista propietario</div><span class="badge red"><span class="bpulse"></span>En disputa</span></div>
+            <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Depósito en escrow</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+            <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Inquilino</span><div class="dr-v nb"><span class="nm">María López</span><span class="na">0xAb12...ef34</span></div></div><div class="dr"><span class="dr-l">Árbitro</span><span class="dr-v">0x7f3a...9b2c</span></div></div>
+            <div class="card red"><div style="display:inline-flex;align-items:center;gap:5px;background:#FEE2E2;color:#991B1B;font-size:9px;font-weight:700;padding:3px 8px;border-radius:100px;margin-bottom:8px"><span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>En disputa</div><p style="font-size:11px;color:#57534E;line-height:1.6">El inquilino rechazó la propuesta. El árbitro debe resolver. Si no actúa en 30 días, el inquilino recupera el depósito completo.</p></div>
+          </div>
+          <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+        </div>
+      </div>
+      <div class="branch-v-arrow arb"><div class="branch-v-lbl">Árbitro resuelve → resolve()</div><div class="branch-v-sym" style="color:#7C3AED">↓</div></div>
+      <div class="phone-wrap">
+        <div class="screen-num">11 · Completado — retirar</div>
+        <div class="phone">
+          <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar"></div><span>0x4f2a...3b8c</span></div></div></div></div>
+          <div class="content">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista propietario</div><span class="badge gray">Completado</span></div>
+            <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Depósito en escrow</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+            <div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:10px">Fondos disponibles</h2><div class="dr" style="margin-bottom:10px"><span class="dr-l">Tu parte (árbitro asignó)</span><span class="dr-v acc">0.145 AVAX</span></div><button class="btn primary">Retirar 0.145 AVAX →</button></div>
+          </div>
+          <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     FLUJO 3: INQUILINO
+══════════════════════════════════════ -->
+<div class="flow-section">
+  <div class="flow-section-label">Flujo 3</div>
+  <div class="flow-section-title">Inquilino — Desde recibir el link hasta retirar</div>
+
+  <div class="flow-row">
+
+    <!-- Entry: recibe link -->
+    <div class="phone-wrap">
+      <div class="screen-num">Link recibido</div>
+      <div class="phone mini">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div></div></div>
+        <div class="content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;gap:10px;padding:16px">
+          <div style="font-size:28px">📱</div>
+          <div style="text-align:center"><p style="font-size:12px;font-weight:700;color:#1C1917">WhatsApp / Telegram</p><p style="font-size:10px;color:#78716C;margin-top:3px;line-height:1.4">Recibe URL con el contrato y la abre</p></div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow tenant"><div class="h-arrow-lbl">Abre link del contrato</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- T-Sin wallet (sin conectar) -->
+    <div class="phone-wrap">
+      <div class="screen-num">12 · /contract — sin wallet conectada</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner">
+          <div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div>
+          <div class="nav-right"><button class="connect-btn">Conectar wallet</button></div>
+        </div></div>
+        <div class="content">
+          <div class="stag" style="margin-bottom:6px">contrato de garantía</div>
+          <div style="margin-bottom:13px">
+            <p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Depósito requerido</p>
+            <div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div>
+          </div>
+          <div class="card" style="margin-bottom:11px;padding:14px">
+            <div class="dr"><span class="dr-l">Propietario</span><div class="dr-v nb"><span class="nm">Juan García</span><span class="na">0x4f2a...3b8c</span></div></div>
+            <div class="dr"><span class="dr-l">Árbitro</span><span class="dr-v">0x7f3a...9b2c</span></div>
+            <div class="dr"><span class="dr-l">Vence el</span><span class="dr-v" style="font-family:inherit">15/01/2026</span></div>
+            <div class="dr"><span class="dr-l">Ver en Snowtrace</span><span class="dr-v" style="color:#A07850;text-decoration:underline">0xD4f0...9b2e →</span></div>
+          </div>
+          <div class="card" style="text-align:center;padding:24px 16px">
+            <div style="width:44px;height:44px;border-radius:14px;background:#F5F0E8;border:1.5px solid #E5DFD5;display:flex;align-items:center;justify-content:center;margin:0 auto 12px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><circle cx="12" cy="12" r="1"/></svg></div>
+            <p style="font-size:12px;font-weight:700;color:#1C1917;margin-bottom:5px">Conectá tu wallet para continuar</p>
+            <p style="font-size:10px;color:#78716C;line-height:1.5;margin-bottom:14px">Necesitás conectar MetaMask u otra wallet compatible con Avalanche para depositar la garantía.</p>
+            <button class="btn primary">Conectar wallet →</button>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow system"><div class="h-arrow-lbl">Conecta wallet</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- T-Created -->
+    <div class="phone-wrap">
+      <div class="screen-num">13 · Depositar garantía</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar" style="background:linear-gradient(135deg,#A07850,#1C1917)"></div><span>0xAb12...ef34</span></div></div></div></div>
+        <div class="content">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista inquilino</div><span class="badge gray"><span class="bpulse"></span>Esperando depósito</span></div>
+          <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Tu depósito</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero" style="color:#D6D3D1">0.495</span><span style="font-size:17px;color:#D6D3D1;font-weight:500">AVAX</span></div></div>
+          <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Propietario</span><div class="dr-v nb"><span class="nm">Juan García</span><span class="na">0x4f2a...3b8c</span></div></div><div class="dr"><span class="dr-l">Árbitro</span><span class="dr-v">0x7f3a...9b2c</span></div><div class="dr"><span class="dr-l">Vence el</span><span class="dr-v" style="font-family:inherit">15/01/2026</span></div><div class="dr"><span class="dr-l">Ver en Snowtrace</span><span class="dr-v" style="color:#A07850;text-decoration:underline">0xD4f0...9b2e →</span></div></div>
+          <div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:7px">Depositar garantía</h2><p style="font-size:11px;color:#78716C;margin-bottom:12px;line-height:1.5">El propietario creó el contrato. Depositá exactamente 0.495 AVAX para activarlo.</p><button class="btn primary">Depositar 0.495 AVAX →</button></div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow tenant"><div class="h-arrow-lbl">fund() — envía AVAX</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- T-Funded -->
+    <div class="phone-wrap">
+      <div class="screen-num">14 · Activo — depósito bloqueado</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar" style="background:linear-gradient(135deg,#A07850,#1C1917)"></div><span>0xAb12...ef34</span></div></div></div></div>
+        <div class="content">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista inquilino</div><span class="badge green"><span class="bpulse"></span>Activo</span></div>
+          <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Tu depósito</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+          <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Propietario</span><div class="dr-v nb"><span class="nm">Juan García</span><span class="na">0x4f2a...3b8c</span></div></div><div class="dr"><span class="dr-l">Vence el</span><span class="dr-v" style="font-family:inherit">15/01/2026</span></div></div>
+          <div class="card"><div style="display:flex;align-items:center;gap:7px;margin-bottom:8px"><div style="width:7px;height:7px;border-radius:50%;background:#22C55E;flex-shrink:0"></div><p style="font-size:12px;font-weight:700;color:#166534">Depósito bloqueado — esperando propuesta</p></div><p style="font-size:11px;color:#78716C;margin-bottom:12px;line-height:1.5">El propietario debe proponer cómo distribuir el depósito al finalizar el contrato. Podés cancelar dentro de las primeras 24hs.</p><button class="btn danger" style="margin-bottom:7px">Cancelar contrato</button><button class="btn outline">Reclamar (si venció plazo)</button></div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow landlord"><div class="h-arrow-lbl">Propietario propone</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- T-Proposed -->
+    <div class="phone-wrap">
+      <div class="screen-num">15 · Propuesta recibida — aceptar o rechazar</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar" style="background:linear-gradient(135deg,#A07850,#1C1917)"></div><span>0xAb12...ef34</span></div></div></div></div>
+        <div class="content">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista inquilino</div><span class="badge amber"><span class="bpulse"></span>Propuesta enviada</span></div>
+          <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Tu depósito</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+          <div class="card">
+            <h2 style="font-size:15px;font-weight:900;margin-bottom:10px">Propuesta recibida</h2>
+            <div class="cdown-lbl">Tiempo restante</div>
+            <div class="cdown-bar"><div class="cdown-fill" style="width:65%"></div></div>
+            <div class="cdown-grid"><div class="cdown-cell"><div class="cdown-num">04</div><div class="cdown-unit">días</div></div><div class="cdown-cell"><div class="cdown-num">18</div><div class="cdown-unit">horas</div></div><div class="cdown-cell"><div class="cdown-num">32</div><div class="cdown-unit">min</div></div><div class="cdown-cell"><div class="cdown-num">11</div><div class="cdown-unit">seg</div></div></div>
+            <div class="split-bar"><div class="sp-t" style="width:60%"></div><div class="sp-l" style="width:40%"></div></div>
+            <div><div class="dr"><span class="dr-l">Tu parte</span><span class="dr-v acc">0.297 AVAX</span></div><div class="dr"><span class="dr-l">Propietario</span><span class="dr-v" style="font-family:inherit;font-weight:700">0.198 AVAX</span></div><div class="dr"><span class="dr-l">Total</span><span class="dr-v" style="font-family:inherit;font-weight:700">0.495 AVAX</span></div></div>
+            <div class="divider"></div>
+            <button class="btn success" style="margin-bottom:7px">Aceptar y retirar →</button>
+            <button class="btn outline">Rechazar y pedir árbitro</button>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+  </div><!-- end flow-row inquilino -->
+
+  <!-- Branch from T-Proposed -->
+  <div style="margin-top:-4px;margin-bottom:6px;padding-left:1564px">
+    <div style="display:flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M7 12l-4-4M7 12l4-4" stroke="#C4B5A5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-size:10px;color:#A8A29E;font-weight:700">Inquilino decide desde pantalla 15:</span></div>
+  </div>
+  <div style="display:flex;gap:40px;padding-left:1548px;align-items:flex-start">
+
+    <div class="branch-col accept">
+      <span class="branch-pill pill-accept">✓ Acepta propuesta</span>
+      <div class="branch-v-arrow"><div class="branch-v-lbl">accept()</div><div class="branch-v-sym">↓</div></div>
+      <div class="phone-wrap">
+        <div class="screen-num">16 · Completado — retirar</div>
+        <div class="phone">
+          <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar" style="background:linear-gradient(135deg,#A07850,#1C1917)"></div><span>0xAb12...ef34</span></div></div></div></div>
+          <div class="content">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista inquilino</div><span class="badge gray">Completado</span></div>
+            <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Tu depósito</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+            <div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:10px">Fondos disponibles</h2><div class="dr" style="margin-bottom:10px"><span class="dr-l">Tu parte</span><span class="dr-v acc">0.297 AVAX</span></div><button class="btn primary">Retirar 0.297 AVAX →</button></div>
+          </div>
+          <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="branch-col reject">
+      <span class="branch-pill pill-reject">✗ Rechaza propuesta</span>
+      <div class="branch-v-arrow"><div class="branch-v-lbl">reject()</div><div class="branch-v-sym">↓</div></div>
+      <div class="phone-wrap">
+        <div class="screen-num">17 · En disputa — esperando árbitro</div>
+        <div class="phone">
+          <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar" style="background:linear-gradient(135deg,#A07850,#1C1917)"></div><span>0xAb12...ef34</span></div></div></div></div>
+          <div class="content">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista inquilino</div><span class="badge red"><span class="bpulse"></span>En disputa</span></div>
+            <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Tu depósito</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+            <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Propietario</span><div class="dr-v nb"><span class="nm">Juan García</span><span class="na">0x4f2a...3b8c</span></div></div></div>
+            <div class="card red"><div style="display:inline-flex;align-items:center;gap:4px;background:#FEE2E2;color:#991B1B;font-size:9px;font-weight:700;padding:3px 8px;border-radius:100px;margin-bottom:8px"><span style="width:5px;height:5px;border-radius:50%;background:currentColor"></span>En disputa</div><p style="font-size:11px;color:#57534E;margin-bottom:12px;line-height:1.5">El árbitro tiene 30 días para resolver. Si no actúa, podés reclamar el depósito completo.</p>
+            <div class="cdown-bar"><div class="cdown-fill" style="width:40%;background:#EF4444"></div></div>
+            <div class="cdown-grid"><div class="cdown-cell"><div class="cdown-num" style="color:#EF4444">18</div><div class="cdown-unit">días</div></div><div class="cdown-cell"><div class="cdown-num">04</div><div class="cdown-unit">horas</div></div><div class="cdown-cell"><div class="cdown-num">22</div><div class="cdown-unit">min</div></div><div class="cdown-cell"><div class="cdown-num">47</div><div class="cdown-unit">seg</div></div></div>
+            <button class="btn outline" style="font-size:10px;padding:8px">Reclamar por inactividad del árbitro</button></div>
+          </div>
+          <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+        </div>
+      </div>
+      <div class="branch-v-arrow arb"><div class="branch-v-lbl">Árbitro resuelve → resolve()</div><div class="branch-v-sym" style="color:#7C3AED">↓</div></div>
+      <div class="phone-wrap">
+        <div class="screen-num">18 · Completado — retirar</div>
+        <div class="phone">
+          <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar" style="background:linear-gradient(135deg,#A07850,#1C1917)"></div><span>0xAb12...ef34</span></div></div></div></div>
+          <div class="content">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px"><div class="stag" style="margin-bottom:0">vista inquilino</div><span class="badge gray">Completado</span></div>
+            <div style="margin-bottom:13px"><p style="font-size:12px;font-weight:700;color:#A8A29E;margin-bottom:3px">Tu depósito</p><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+            <div class="card"><h2 style="font-size:15px;font-weight:900;margin-bottom:10px">Fondos disponibles</h2><div class="dr" style="margin-bottom:10px"><span class="dr-l">Tu parte (árbitro asignó)</span><span class="dr-v acc">0.350 AVAX</span></div><button class="btn primary">Retirar 0.350 AVAX →</button></div>
+          </div>
+          <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════
+     FLUJO 4: ÁRBITRO
+══════════════════════════════════════ -->
+<div class="flow-section">
+  <div class="flow-section-label">Flujo 4</div>
+  <div class="flow-section-title">Árbitro — Solo interviene si hay disputa</div>
+
+  <div class="flow-row">
+
+    <div class="phone-wrap">
+      <div class="screen-num">↑ pantalla 5</div>
+      <div class="phone mini">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div></div></div>
+        <div class="content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;padding:16px">
+          <div style="font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px">Contratos</div>
+          <p style="font-size:10px;color:#78716C;text-align:center;line-height:1.5">El árbitro ve el contrato en su lista cuando es parte del mismo</p>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow arbitrator"><div class="h-arrow-lbl">Abre contrato</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- Arb: sin disputa -->
+    <div class="phone-wrap">
+      <div class="screen-num">18 · Sin disputa activa</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar" style="background:linear-gradient(135deg,#7C3AED,#4C1D95)"></div><span>0x7f3a...9b2c</span></div></div></div></div>
+        <div class="content">
+          <div class="stag">vista árbitro</div>
+          <div class="card" style="text-align:center;padding:36px 18px">
+            <span class="badge green" style="margin-bottom:10px;display:inline-flex">Sin disputa activa</span>
+            <p style="font-size:11px;color:#A8A29E;margin-bottom:18px;line-height:1.5">El contrato no está en estado de disputa. No se requiere intervención.</p>
+            <div class="divider"></div>
+            <div style="text-align:left"><div class="dr"><span class="dr-l">Inquilino</span><span class="dr-v">0xAb12...ef34</span></div><div class="dr"><span class="dr-l">Propietario</span><span class="dr-v">0x4f2a...3b8c</span></div></div>
+            <div style="margin-top:14px"><span class="avax-chain-link">Ver en Snowtrace →</span></div>
+          </div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow arbitrator"><div class="h-arrow-lbl">Inquilino rechaza → disputa abierta</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- Arb: con disputa -->
+    <div class="phone-wrap">
+      <div class="screen-num">19 · Disputa activa — emitir resolución</div>
+      <div class="phone">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div><div class="nav-right"><div class="wallet-btn"><div class="avatar" style="background:linear-gradient(135deg,#7C3AED,#4C1D95)"></div><span>0x7f3a...9b2c</span></div></div></div></div>
+        <div class="content">
+          <div class="stag">vista árbitro</div>
+          <div style="margin-bottom:13px"><h1 style="font-size:15px;font-weight:700;color:#A8A29E;margin-bottom:3px">En disputa</h1><div style="display:flex;align-items:baseline;gap:6px"><span class="amount-hero">0.495</span><span style="font-size:17px;color:#A8A29E;font-weight:500">AVAX</span></div></div>
+          <div class="card" style="margin-bottom:11px;padding:14px"><div class="dr"><span class="dr-l">Inquilino</span><span class="dr-v">0xAb12...ef34</span></div><div class="dr"><span class="dr-l">Propietario</span><span class="dr-v">0x4f2a...3b8c</span></div><div class="dr"><span class="dr-l">Propuesta original (inquilino)</span><span class="dr-v acc">0.297 AVAX</span></div><div class="dr"><span class="dr-l">Propuesta original (propietario)</span><span class="dr-v" style="font-family:inherit;font-weight:700">0.198 AVAX</span></div></div>
+          <div style="margin-bottom:11px"><div class="cdown-lbl">Tu ventana de resolución</div><div class="cdown-bar"><div class="cdown-fill" style="width:40%;background:#EF4444"></div></div><div class="cdown-grid"><div class="cdown-cell"><div class="cdown-num" style="color:#EF4444">18</div><div class="cdown-unit">días</div></div><div class="cdown-cell"><div class="cdown-num">04</div><div class="cdown-unit">horas</div></div><div class="cdown-cell"><div class="cdown-num">22</div><div class="cdown-unit">min</div></div><div class="cdown-cell"><div class="cdown-num">47</div><div class="cdown-unit">seg</div></div></div></div>
+          <div class="card" style="display:flex;flex-direction:column;gap:9px"><h2 style="font-size:15px;font-weight:900">Resolución final</h2><p style="font-size:10px;color:#78716C;line-height:1.5">Tu decisión es vinculante e irreversible. El contrato ejecuta la distribución automáticamente.</p><div class="input-wrap"><label class="input-label">Para el inquilino (AVAX)</label><input class="input-field" value="0.350" type="number" step="0.0001"/></div><div class="input-wrap"><label class="input-label">Para el propietario (AVAX)</label><input class="input-field" value="0.145" type="number" step="0.0001"/></div><p style="font-size:10px;color:#A8A29E">Total a distribuir: 0.495 AVAX</p><button class="btn primary">Emitir resolución →</button></div>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span><span class="footer-copy">© 2025</span></div></div>
+      </div>
+    </div>
+
+    <div class="h-arrow arbitrator"><div class="h-arrow-lbl">resolve() confirmado</div><div class="h-arrow-line"><div class="h-arrow-dash"></div><div class="h-arrow-tip">▶</div></div></div>
+
+    <!-- Completado para ambas partes -->
+    <div class="phone-wrap">
+      <div class="screen-num">Propietario + Inquilino retiran</div>
+      <div class="phone mini">
+        <div class="nav"><div class="nav-inner"><div class="logo-wrap"><div class="logo-dot"></div><span class="logo-text">GarantYa</span></div></div></div>
+        <div class="content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:12px;padding:18px">
+          <span class="badge gray" style="font-size:11px;padding:5px 12px">Completado</span>
+          <div style="text-align:center"><p style="font-size:12px;font-weight:700;color:#1C1917">Cada parte retira</p><p style="font-size:10px;color:#78716C;margin-top:4px;line-height:1.5">Propietario: 0.145 AVAX<br>Inquilino: 0.350 AVAX</p></div>
+          <button class="btn primary" style="font-size:11px;padding:9px">withdraw() →</button>
+        </div>
+        <div class="footer"><div class="footer-inner"><span class="footer-logo">GarantYa</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p style="font-size:11px;color:#A8A29E;text-align:center;margin-top:40px">GarantYa · Aleph Hackathon Mar del Plata · Avalanche Fuji Testnet · 20 pantallas</p>
+
+</body>
+</html>

@@ -26,7 +26,7 @@ export async function generateMetadata({ params, searchParams }: Readonly<Props>
   const desc = ogDescs[lang] ?? ogDescs.en;
 
   const ogImage = {
-    url: `/api/og?address=${addr}&lang=${lang}`,
+    url: `https://garantya.vercel.app/api/og?address=${addr}&lang=${lang}`,
     width: 1200,
     height: 630,
     alt: "GarantYa — Rental guarantee on blockchain",

@@ -33,7 +33,7 @@ function AlertBanner({ contracts, targetState, title, description }: {
   if (matching.length === 0) return null;
 
   return (
-    <Link href={`/contrato/${matching[0]}`}>
+    <Link href={`/contract/${matching[0]}`}>
       <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 cursor-pointer hover:border-amber-300 transition-colors"
         style={{ boxShadow: "0 1px 3px rgba(180,120,0,0.08)" }}>
         <span className="mt-0.5 flex-shrink-0 text-amber-500">
@@ -68,50 +68,61 @@ function HighlightedAddress({ address, query }: { address: string; query: string
   );
 }
 
-function ContractItem({ address, state, index, highlight, daysLeft, statePill, meta, onHover }: { address: Address; state: number | undefined; index: number; highlight?: string; daysLeft?: number; statePill: Record<number, { label: string; className: string }>; meta?: ContractMetadata; onHover?: () => void }) {
+function formatDate(ts: number): string {
+  return new Date(ts).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+}
+
+function shortAddr(address: string): string {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function ContractItem({ address, state, index, highlight, daysLeft, deadline, statePill, meta, tenantAddr, onHover }: {
+  address: Address;
+  state: number | undefined;
+  index: number;
+  highlight?: string;
+  daysLeft?: number;
+  deadline?: number;
+  statePill: Record<number, { label: string; className: string }>;
+  meta?: ContractMetadata;
+  tenantAddr?: string;
+  onHover?: () => void;
+}) {
   const { t } = useT();
   const pill = state !== undefined ? statePill[state] : undefined;
-  const isCompleted = state === ContractState.Completed;
-  const showDays = state === ContractState.Funded && daysLeft !== undefined;
-  const daysUrgent = daysLeft !== undefined && daysLeft <= 30;
+  const isDone = state === ContractState.Completed || state === ContractState.Cancelled;
+
+  const createdDate = meta?.created_at ? formatDate(new Date(meta.created_at).getTime()) : null;
+  const endDate     = deadline ? formatDate(deadline * 1000) : null;
+  const showDaysLeft = !isDone && daysLeft !== undefined;
+  const daysColor   = !daysLeft ? "text-red-500" : daysLeft <= 30 ? "text-red-500" : daysLeft <= 90 ? "text-amber-500" : "text-stone-400";
 
   return (
-    <Link href={`/contrato/${address}`}>
+    <Link href={`/contract/${address}`}>
       <div
-        className={`card transition-all duration-150 cursor-pointer group hover:-translate-y-px ${isCompleted ? "opacity-60 hover:opacity-100" : "hover:border-stone-300"}`}
+        className={`card transition-all duration-150 cursor-pointer group hover:-translate-y-px ${isDone ? "opacity-60 hover:opacity-100" : "hover:border-stone-300"}`}
         style={{ animationDelay: `${index * 50}ms` }}
         onMouseEnter={onHover}
       >
-        <div className="flex items-center justify-between gap-3">
+        {/* Row 1: property / address + state pill */}
+        <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-[#F5F0E8] border border-[#E5DFD5] flex items-center justify-center flex-shrink-0">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M2 7l5-5 5 5M3 6.5V12h3V9h2v3h3V6.5" stroke="#A07850" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="min-w-0">
-              {meta?.property_address ? (
-                <>
-                  <p className="text-sm font-semibold text-stone-700 truncate">{meta.property_address}</p>
-                  {(meta.landlord_name || meta.tenant_name) && (
-                    <p className="text-[11px] text-stone-400 truncate">
-                      {meta.landlord_name} → {meta.tenant_name}
-                    </p>
-                  )}
-                </>
-              ) : (
-                <span className="font-mono text-sm text-stone-600 tracking-tight truncate">
-                  <HighlightedAddress address={address} query={highlight ?? ""} />
-                </span>
-              )}
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-stone-700 truncate">
+                {meta?.property_address || (
+                  <span className="font-mono tracking-tight">
+                    <HighlightedAddress address={shortAddr(address)} query={highlight ?? ""} />
+                  </span>
+                )}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            {showDays && (
-              <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${daysUrgent ? "bg-red-50 text-red-600" : "bg-stone-100 text-stone-400"}`}>
-                {daysLeft === 0 ? t.contracts.expired : `${daysLeft}d`}
-              </span>
-            )}
             {pill && (
               <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full ${pill.className}`}>
                 {pill.label}
@@ -120,6 +131,43 @@ function ContractItem({ address, state, index, highlight, daysLeft, statePill, m
             <span className="text-stone-300 group-hover:text-stone-600 transition-colors text-sm">→</span>
           </div>
         </div>
+
+        {/* Row 2: tenant + dates */}
+        {(meta?.tenant_name || createdDate || endDate) && (
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-stone-100 flex-wrap">
+            {(meta?.tenant_name || tenantAddr) && (
+              <>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-600 bg-stone-100 rounded-full px-2 py-0.5">
+                  <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                    <circle cx="5" cy="3.5" r="2" stroke="currentColor" strokeWidth="1.3" />
+                    <path d="M1.5 9c0-1.933 1.567-3 3.5-3s3.5 1.067 3.5 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  </svg>
+                  {meta?.tenant_name ?? shortAddr(tenantAddr!)}
+                </span>
+                {(createdDate || endDate) && <span className="text-stone-200 text-[10px]">·</span>}
+              </>
+            )}
+            {createdDate && (
+              <span className="text-[10px] text-stone-400">
+                <span className="font-semibold text-stone-500">{t.contracts.created}</span> {createdDate}
+              </span>
+            )}
+            {createdDate && endDate && <span className="text-stone-200 text-[10px]">·</span>}
+            {endDate && (
+              <span className="text-[10px] text-stone-400">
+                <span className="font-semibold text-stone-500">{t.contracts.ends}</span> {endDate}
+              </span>
+            )}
+            {showDaysLeft && (
+              <>
+                <span className="text-stone-200 text-[10px]">·</span>
+                <span className={`text-[10px] font-bold ${daysColor}`}>
+                  {daysLeft === 0 ? t.contracts.expired : `${daysLeft}d`}
+                </span>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </Link>
   );
@@ -159,7 +207,7 @@ export default function MisContratosPage() {
       return;
     }
     logger.log("[Garantya:MisContratos] Navegando a contrato:", addr);
-    router.push(`/contrato/${addr}`);
+    router.push(`/contract/${addr}`);
   }
 
   const { data: asTenant, isLoading: loadingTenant } = useReadContract({
@@ -199,7 +247,7 @@ export default function MisContratosPage() {
     supabase
       .from("contracts")
       .select("*")
-      .in("address", all)
+      .in("address", all.map(a => a.toLowerCase()))
       .then(({ data }) => {
         if (!data) return;
         const map: Record<string, ContractMetadata> = {};
@@ -248,6 +296,15 @@ export default function MisContratosPage() {
     query: { enabled: allContracts.length > 0, staleTime: 60_000, gcTime: 5 * 60_000 },
   });
 
+  const { data: tenantsData } = useReadContracts({
+    contracts: allContracts.map(addr => ({
+      address: addr,
+      abi: GARANTYA_ABI,
+      functionName: "tenant" as const,
+    })),
+    query: { enabled: allContracts.length > 0, staleTime: 300_000, gcTime: 10 * 60_000 },
+  });
+
   const hasContracts = tenantContracts.length > 0 || landlordContracts.length > 0;
   const dataReady    = !isLoadingContracts && !!address;
 
@@ -269,6 +326,15 @@ export default function MisContratosPage() {
     });
     return map;
   }, [allContracts, deadlinesData]);
+
+  const tenantMap = useMemo(() => {
+    const map = new Map<Address, string>();
+    allContracts.forEach((addr, i) => {
+      const raw = tenantsData?.[i]?.result;
+      if (raw) map.set(addr, raw as string);
+    });
+    return map;
+  }, [allContracts, tenantsData]);
 
   const query = searchAddress.trim().toLowerCase();
   const filteredLandlord = query
@@ -399,7 +465,7 @@ export default function MisContratosPage() {
             <span className="text-[11px] font-bold text-stone-300">{filteredLandlord.length}</span>
           </div>
           {filteredLandlord.map((addr, i) => (
-            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} statePill={STATE_PILL} meta={metaMap[addr.toLowerCase()]} onHover={() => prefetchContract(addr)} />
+            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} deadline={deadlineMap.get(addr)} statePill={STATE_PILL} meta={metaMap[addr.toLowerCase()]} tenantAddr={tenantMap.get(addr)} onHover={() => prefetchContract(addr)} />
           ))}
         </div>
       )}
@@ -412,7 +478,7 @@ export default function MisContratosPage() {
             <span className="text-[11px] font-bold text-stone-300">{filteredTenant.length}</span>
           </div>
           {filteredTenant.map((addr, i) => (
-            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} statePill={STATE_PILL} meta={metaMap[addr.toLowerCase()]} onHover={() => prefetchContract(addr)} />
+            <ContractItem key={addr} address={addr} state={getState(addr)} index={i} highlight={searchAddress.trim()} daysLeft={getDaysLeft(addr)} deadline={deadlineMap.get(addr)} statePill={STATE_PILL} meta={metaMap[addr.toLowerCase()]} tenantAddr={tenantMap.get(addr)} onHover={() => prefetchContract(addr)} />
           ))}
         </div>
       )}

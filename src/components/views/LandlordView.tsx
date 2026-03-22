@@ -21,15 +21,17 @@ import {
 import type { useEscrow } from "@/lib/hooks/useEscrow";
 import { useT } from "@/contexts/LanguageContext";
 import { logger } from "@/lib/logger";
+import type { ContractMetadata } from "@/lib/supabase";
 
 type EscrowData = ReturnType<typeof useEscrow>;
 
 interface LandlordViewProps {
   address: Address;
   escrow: EscrowData;
+  meta?: ContractMetadata;
 }
 
-export function LandlordView({ address, escrow }: LandlordViewProps) {
+export function LandlordView({ address, escrow, meta }: LandlordViewProps) {
   const {
     tenant, arbitrator, state, deposit,
     deadline, proposal, allocations, refetch,
@@ -133,7 +135,18 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
 
       {/* Info */}
       <div className="card space-y-0">
-        <DataRow label={t.common.tenant}    value={shortenAddress(tenant!)}    mono />
+        <DataRow
+          label={t.common.tenant}
+          value={
+            meta?.tenant_name ? (
+              <div className="text-right">
+                <p className="text-sm font-bold text-[#1C1917]">{meta.tenant_name}</p>
+                <p className="text-[11px] font-mono text-stone-400 mt-0.5">{shortenAddress(tenant!)}</p>
+              </div>
+            ) : shortenAddress(tenant!)
+          }
+          mono={!meta?.tenant_name}
+        />
         <DataRow label={t.common.arbitrator} value={shortenAddress(arbitrator!)} mono />
         {deadline && (
           <DataRow
@@ -156,7 +169,7 @@ export function LandlordView({ address, escrow }: LandlordViewProps) {
       {/* State: Created — waiting for tenant */}
       {state === ContractState.Created && (() => {
         const origin = globalThis.window?.location.origin ?? "";
-        const shareUrl = `${origin}/contrato/${address}?lang=${locale}`;
+        const shareUrl = `${origin}/contract/${address}?lang=${locale}`;
         const waText = encodeURIComponent(t.landlord.waMessage(shareUrl));
         const tgText = encodeURIComponent(t.landlord.tgMessage);
         return (

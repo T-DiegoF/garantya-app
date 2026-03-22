@@ -19,6 +19,7 @@ type EscrowData = ReturnType<typeof useEscrow>;
 interface ArbitratorViewProps {
   address: Address;
   escrow: EscrowData;
+  meta?: import("@/lib/supabase").ContractMetadata;
 }
 
 export function ArbitratorView({ address, escrow }: ArbitratorViewProps) {

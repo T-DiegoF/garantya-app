@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GarantYa — Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#e2ddd6;color:#1C1917;-webkit-font-smoothing:antialiased;padding-top:64px;min-width:max-content}
+/* Sticky header */
+.hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(245,240,232,.97);backdrop-filter:blur(8px);border-bottom:1.5px solid #E0D9CE;display:flex;align-items:center;gap:16px;padding:0 24px;height:56px;min-width:max-content}
+.hdr-brand{font-size:15px;font-weight:900;letter-spacing:-.03em;color:#1C1917;white-space:nowrap;margin-right:8px}
+.hdr-brand span{color:#A07850}
+.tab-group{display:flex;gap:3px;background:#F5F0E8;border:1.5px solid #E5DFD5;border-radius:10px;padding:3px}
+.tab{font-size:12px;font-weight:700;padding:5px 13px;border-radius:7px;border:none;background:transparent;color:#78716C;cursor:pointer;white-space:nowrap}
+.tab.active{background:white;color:#1C1917;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.hdr-sep{width:1px;height:24px;background:#E5DFD5}
+/* Layout */
+.vsec{padding:28px 24px 80px}
+/* Flow */
+.flow-sec{margin-bottom:52px}
+.flow-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#A8A29E;margin-bottom:4px}
+.flow-ttl{font-size:18px;font-weight:900;margin-bottom:14px}
+.flow-row{display:flex;align-items:flex-start;gap:0;padding-bottom:4px}
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:#57534E}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+/* Phone */
+.pw{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.snum{font-size:10px;font-weight:700;color:#A8A29E;text-align:center;margin-bottom:6px;max-width:300px}
+.phone{display:flex;flex-direction:column;width:300px;border-radius:26px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.08);background:#F5F0E8;flex-shrink:0}
+.phone.mini{width:180px;opacity:.65}
+/* Browser */
+.bw{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.browser{width:960px;border-radius:12px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.16);background:white;flex-shrink:0}
+.bbar{background:#F0EFEF;border-bottom:1px solid #E0DDD8;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.wdots{display:flex;gap:6px}
+.wd{width:12px;height:12px;border-radius:50%}
+.wd.r{background:#FF5F57}.wd.y{background:#FFBD2E}.wd.g{background:#28C840}
+.urlbar{flex:1;background:white;border:1px solid #E0DDD8;border-radius:6px;padding:4px 12px;font-size:12px;color:#78716C;font-family:monospace}
+.bbody{height:540px;overflow-y:auto;background:#F5F0E8}
+/* Arrow */
+.arr{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;padding:0 4px;min-width:56px;margin-top:26px}
+.albl{font-size:9px;font-weight:700;text-align:center;max-width:56px;line-height:1.3;color:#78716C}
+.aline{display:flex;align-items:center;width:48px}
+.adash{flex:1;height:2px;background:#C4B5A5;border-radius:1px}
+.atip{color:#C4B5A5;font-size:13px;margin-left:-2px;line-height:1}
+.arr.sys .albl,.arr.sys .atip{color:#1C1917}.arr.sys .adash{background:#1C1917}
+.arr.ll .albl{color:#78350F}.arr.ll .adash{background:#F59E0B}.arr.ll .atip{color:#F59E0B}
+.arr.tt .albl{color:#92400E}.arr.tt .adash{background:#A07850}.arr.tt .atip{color:#A07850}
+.arr.arb .albl{color:#5B21B6}.arr.arb .adash{background:#7C3AED}.arr.arb .atip{color:#7C3AED}
+/* Branch */
+.bsec{display:flex;align-items:flex-start;margin-top:0}
+.bvcol{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:32px}
+.bvline{width:2px;background:#C4B5A5;flex:1;min-height:24px}
+.bcols{display:flex;align-items:flex-start;gap:16px}
+.bcol{display:flex;flex-direction:column;align-items:center;gap:0}
+.bva{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 0}
+.bvlbl{font-size:9px;font-weight:700;text-align:center;max-width:80px;line-height:1.3}
+.bvsym{font-size:16px;line-height:1;color:#C4B5A5}
+.bc-acc .bvlbl{color:#166534}.bc-acc .bvsym{color:#22C55E}
+.bc-rej .bvlbl{color:#991B1B}.bc-rej .bvsym{color:#EF4444}
+.bc-arb .bvlbl{color:#5B21B6}.bc-arb .bvsym{color:#7C3AED}
+/* ─── Design tokens ─── */
+.nav{width:100%;border-bottom:1px solid #E0D9CE;background:rgba(245,240,232,.95)}
+.nav-in{display:flex;height:48px;align-items:center;justify-content:space-between;padding:0 14px}
+.logo-w{display:flex;align-items:center;gap:5px}
+.logo-dot{width:6px;height:6px;border-radius:50%;background:#A07850}
+.logo-t{font-size:13px;font-weight:900;letter-spacing:-.03em;color:#1C1917}
+.nav-r{display:flex;align-items:center;gap:7px}
+.wbtn{background:white;border:1.5px solid #E5DFD5;border-radius:9px;padding:5px 9px;font-size:10px;font-weight:700;color:#1C1917;display:flex;align-items:center;gap:5px}
+.cbtn{background:#1C1917;color:#F5F0E8;font-size:10px;font-weight:700;padding:6px 12px;border-radius:9px;border:none}
+.av{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#A07850,#1C1917);flex-shrink:0}
+.nlink{font-size:11px;font-weight:700;color:#78716C;white-space:nowrap}
+.ct{flex:1;padding:16px 14px;background:#F5F0E8}
+.ft{background:#1C1917;padding:10px 14px}
+.ft-in{display:flex;align-items:center;justify-content:space-between}
+.flogo{font-size:11px;font-weight:900;color:#F5F0E8}
+.fcopy{font-size:9px;color:#44403C}
+.card{background:white;border:1.5px solid #E5DFD5;border-radius:13px;padding:14px;box-shadow:0 1px 4px rgba(28,25,23,.04)}
+.card.amber{background:#FFFBEB;border-color:#FDE68A}
+.card.green{background:#F0FDF4;border-color:#86EFAC}
+.card.red{background:#FFF1F2;border-color:#FCA5A5}
+.card.purple{background:#FAF5FF;border-color:#D8B4FE}
+.stag{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:#A8A29E;margin-bottom:8px}
+.dv{border-top:1px solid #EDE7DC;margin:10px 0}
+.ah{font-size:34px;font-weight:900;letter-spacing:-.04em;line-height:1.05}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:3px 8px;border-radius:100px}
+.badge.green{background:#DCFCE7;color:#166534}
+.badge.amber{background:#FEF3C7;color:#92400E}
+.badge.red{background:#FEE2E2;color:#991B1B}
+.badge.gray{background:#F1F5F9;color:#475569}
+.badge.purple{background:#EDE9FE;color:#5B21B6}
+.bp{width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:8px}
+.btn.pr{background:#1C1917;color:#F5F0E8}
+.btn.su{background:#16A34A;color:white}
+.btn.da{background:#DC2626;color:white}
+.btn.ou{background:white;color:#1C1917;border:1.5px solid #E5DFD5}
+.btn.pu{background:#7C3AED;color:white}
+.inp{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.inp label{font-size:10px;font-weight:700;color:#57534E;text-transform:uppercase;letter-spacing:.05em}
+.inp input{width:100%;padding:8px 10px;border:1.5px solid #E5DFD5;border-radius:9px;font-size:12px;font-family:inherit;background:white;color:#1C1917}
+.inp input::placeholder{color:#C4B5A5}
+.dr{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #F5F0E8}
+.dr:last-child{border-bottom:none}
+.drl{font-size:11px;color:#78716C}
+.drv{font-size:11px;font-weight:600;color:#1C1917;font-family:monospace;text-align:right}
+.drv.acc{color:#A07850;font-weight:700;font-family:inherit}
+.drv.nb{font-family:inherit}
+.nm{font-size:12px;font-weight:700;color:#1C1917;display:block}
+.na{font-size:9px;color:#A8A29E;display:block;font-family:monospace;margin-top:1px}
+.qrbox{width:96px;height:96px;background:white;border-radius:9px;border:1px solid #FDE68A;display:flex;align-items:center;justify-content:center;margin:0 auto}
+.qrpat{display:grid;grid-template-columns:repeat(7,1fr);gap:1.5px;padding:7px;width:80px;height:80px;background:#1C1917;border-radius:2px}
+.qc{background:#F5F0E8;border-radius:1px}.qb{background:#1C1917}
+.share-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.sbtn{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border:1.5px solid #E5DFD5;border-radius:10px;font-size:10px;font-weight:700;color:#1C1917;background:white}
+.step-c{display:flex;align-items:flex-start;gap:9px;background:white;border:1.5px solid #E5DFD5;border-radius:12px;padding:11px;margin-bottom:7px}
+.step-ic{width:28px;height:28px;border-radius:9px;background:#F5F0E8;border:1.5px solid #E5DFD5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.snum2{font-size:8px;font-weight:900;color:#D6D3D1}
+.sttl{font-size:11px;font-weight:700;color:#1C1917}
+.sdesc{font-size:10px;color:#78716C;line-height:1.4;margin-top:2px}
+.cc{background:white;border:1.5px solid #E5DFD5;border-radius:14px;padding:14px;margin-bottom:8px}
+.avax-c{width:20px;height:20px;border-radius:50%;background:#E84142;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px}
+.sc{background:#F5F0E8;border:1.5px solid #E5DFD5;border-radius:8px;padding:6px 3px;text-align:center}
+.sv{font-size:12px;font-weight:900}
+.sl{font-size:7px;color:#A8A29E;margin-top:2px;line-height:1.3}
+.splitbar{height:6px;border-radius:100px;overflow:hidden;display:flex;margin:4px 0 10px}
+.sp-t{background:#A07850}.sp-l{background:#E5DFD5}
+.cdown{background:#F5F0E8;border-radius:10px;padding:10px;margin:8px 0}
+.cg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.cgc{background:white;border-radius:6px;padding:4px 2px;text-align:center}
+.cgn{font-size:14px;font-weight:900;color:#1C1917;line-height:1}
+.cgu{font-size:8px;color:#A8A29E}
+.mframe{width:100%;height:120px;border-radius:10px;border:1.5px solid #E5DFD5;overflow:hidden;margin-top:5px}
+.mframe iframe{width:100%;height:100%;border:none;pointer-events:none}
+.fee-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:10px}
+.wi-ic{width:44px;height:44px;border-radius:13px;background:#F5F0E8;border:1.5px solid #E5DFD5;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.tl{display:flex;flex-direction:column;gap:0;margin-top:8px}
+.tl-it{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #F5F0E8}
+.tl-d{width:8px;height:8px;border-radius:50%;background:#E5DFD5;flex-shrink:0;margin-top:3px}
+.tl-d.on{background:#A07850}
+.tl-t{font-size:10px;color:#57534E}
+.tl-dt{font-size:9px;color:#A8A29E}
+/* Desktop inner layout */
+.d-wrap{max-width:720px;margin:0 auto;padding:24px 32px}
+.d-2col{display:grid;grid-template-columns:1fr 340px;gap:24px;max-width:960px;padding:24px 32px}
+.d-main{flex:1}
+.d-side{width:340px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-brand">Garant<span>Ya</span></div>
+  <div class="tab-group" id="lang-tabs">
+    <button class="tab active" onclick="setLang('en')">EN</button>
+    <button class="tab" onclick="setLang('es')">ES</button>
+    <button class="tab" onclick="setLang('pt')">PT</button>
+  </div>
+  <div class="hdr-sep"></div>
+  <div class="tab-group" id="view-tabs">
+    <button class="tab active" onclick="setView('mobile')">📱 Mobile</button>
+    <button class="tab" onclick="setView('desktop')">🖥 Desktop</button>
+  </div>
+</div>
+
+<div id="mobile-sec" class="vsec"></div>
+<div id="desktop-sec" class="vsec" style="display:none"></div>
+
+<script>
+// ─── Translations ────────────────────────────────────────────────────────────
+const T = {
+en: {
+  lang: 'EN', names: { ll: 'John Smith', tt: 'Emily Johnson', arb: '0xArb1...f2e3' },
+  badge: 'Avalanche · Testnet',
+  heroTitle: 'Security deposit,<br><span style="color:#A07850">protected on blockchain.</span>',
+  heroSub: 'No notaries. No real estate agencies. Just code.',
+  llCard: { tag: 'Landlord', desc: 'Create the contract and set the terms.' },
+  ttCard: { tag: 'Tenant',   desc: 'Deposit and recover your guarantee.' },
+  connectBtn: 'Get started →', noInter: 'No custody. No intermediaries.',
+  howTitle: 'How it works',
+  steps: [
+    { n:'01', t:'Landlord creates the contract', d:'Sets the amount, duration and tenant wallet. No paperwork.' },
+    { n:'02', t:'Tenant deposits the guarantee', d:'Funds are locked on blockchain. No one can move them alone.' },
+    { n:'03', t:'Both parties agree at the end',  d:'Landlord proposes a split. Tenant accepts or disputes.' },
+  ],
+  avTitle: 'Built on Avalanche Fuji Testnet',
+  avLink: 'View factory on Snowtrace →',
+  avStats: [{v:'~1s',l:'transaction finality'},{v:'<$0.01',l:'cost per operation'},{v:'99.9%',l:'uptime'}],
+  myContracts: 'My contracts',
+  conTitle: 'Contracts', newBtn: '+ New',
+  secLl: 'Landlord', secTt: 'Tenant',
+  stCreated: 'Awaiting deposit', stFunded: 'Active', stProposed: 'Proposal sent',
+  stDisputed: 'In dispute', stCompleted: 'Completed', stCancelled: 'Cancelled',
+  endsLbl: 'Ends', createdLbl: 'Created',
+  formTag: 'new contract', formTitle: 'Create contract',
+  formSub: 'The deposit is locked until both parties agree.',
+  walletLbl: 'Tenant wallet', addrLbl: 'Property address',
+  llNameLbl: 'Your full name', ttNameLbl: 'Tenant full name',
+  daysLbl: 'Duration (days)', amountLbl: 'Guarantee (AVAX)',
+  feeLbl: 'Fee (1%)', depLbl: 'Effective deposit',
+  createBtn: 'Create and lock deposit →',
+  contractCreated: 'Contract created', redirecting: 'Redirecting to your contracts…', viewTx: 'View transaction →',
+  llTag: 'landlord view', escrowTitle: 'Deposit in escrow',
+  waitingTitle: 'Waiting for tenant deposit',
+  waitingDesc: 'Share this QR or link with your tenant to deposit the guarantee.',
+  copyLink: 'Copy link',
+  proposeTitle: 'Propose distribution',
+  proposeDesc: 'You can only propose once. The tenant has 7 days to respond.',
+  forTt: 'For tenant (AVAX)', forMe: 'For me (AVAX)',
+  totalAvail: 'Total available: 0.495 AVAX',
+  proposeBtn: 'Propose distribution →',
+  proposedTitle: 'Proposal sent',
+  propTt: 'For tenant', propLl: 'For me', propExp: 'Expires',
+  waitingResp: 'Waiting for tenant response. Auto-accepted after 7 days.',
+  timeoutLbl: 'If deadline has passed:',
+  execTimeout: 'Execute timeout',
+  llDisputed: 'Tenant rejected the proposal. The arbitrator must resolve.',
+  llCompleted: 'Funds available', llYourPart: 'Your part',
+  llWithdraw: 'Withdraw 0.297 AVAX →',
+  ttTag: 'tenant view',
+  connectWalletTitle: 'Connect your wallet',
+  connectWalletDesc: 'You need to connect MetaMask or another compatible wallet to deposit your guarantee.',
+  connectWalletBtn: 'Connect wallet →',
+  fundTitle: 'Deposit guarantee',
+  fundDesc: 'The landlord created the contract. Deposit exactly 0.495 AVAX to activate it.',
+  fundBtn: 'Deposit 0.495 AVAX →',
+  fundedStatus: 'Deposit locked — awaiting proposal',
+  fundedDesc: 'The landlord must propose how to distribute the deposit at end of contract.',
+  cancelBtn: 'Cancel contract', reclaimBtn: 'Reclaim (if expired)',
+  ttProposedTitle: 'Proposal received', ttYourPart: 'Your part',
+  propLlLbl: 'Landlord', totalLbl: 'Total',
+  acceptBtn: 'Accept and withdraw →', rejectBtn: 'Reject and request arbitrator',
+  ttDisputed: 'The arbitrator has 30 days to resolve. If they don\'t act, you can claim the full deposit.',
+  ttCompleted: 'Funds available', ttWithdraw: 'Withdraw 0.297 AVAX →',
+  arbTag: 'arbitrator view', noDispute: 'No active dispute',
+  noDisputeDesc: 'The contract is not in dispute. No intervention required.',
+  arbDisputed: 'In dispute',
+  origTt: 'Original proposal (tenant)', origLl: 'Original proposal (landlord)',
+  resWindow: 'Your resolution window', resTitle: 'Final resolution',
+  resDesc: 'Your decision is binding and irreversible.',
+  forTtArb: 'For tenant (AVAX)', forLlArb: 'For landlord (AVAX)',
+  totalDist: 'Total to distribute: 0.495 AVAX',
+  resolveBtn: 'Issue resolution →',
+  llLbl: 'Landlord', ttLbl: 'Tenant', arbLbl: 'Arbitrator',
+  expiresOn: 'Expires on', viewOnChain: 'View on Snowtrace', backHome: 'Back to home',
+  loading: 'Loading contract…',
+  flowTitles: ['Start & contract creation','Landlord — proposal & resolution','Tenant — deposit & resolution','Arbitrator'],
+  legend: ['System / automatic','Landlord action','Tenant action','Arbitrator action'],
+  branchAccept: ['✓ Accepts','→ Completed'], branchReject: ['✕ Rejects','→ Disputed'],
+  linkReceived: 'Link received',
+  waShare: 'WhatsApp', tgShare: 'Telegram',
+},
+es: {
+  lang: 'ES', names: { ll: 'Juan García', tt: 'María López', arb: '0xArb1...f2e3' },
+  badge: 'Avalanche · Testnet',
+  heroTitle: 'Depósito de garantía,<br><span style="color:#A07850">protegido en blockchain.</span>',
+  heroSub: 'Sin escribanos. Sin inmobiliarias. Solo código.',
+  llCard: { tag: 'Propietario', desc: 'Creá el contrato y fijá los términos.' },
+  ttCard: { tag: 'Inquilino',   desc: 'Depositá y recuperá tu garantía.' },
+  connectBtn: 'Comenzar →', noInter: 'Sin custodia. Sin intermediarios.',
+  howTitle: 'Cómo funciona',
+  steps: [
+    { n:'01', t:'El propietario crea el contrato', d:'Define el monto, el plazo y la wallet del inquilino. Sin papeles.' },
+    { n:'02', t:'El inquilino deposita la garantía', d:'Los fondos quedan bloqueados en blockchain. Nadie los mueve solo.' },
+    { n:'03', t:'Ambos acuerdan al finalizar', d:'El propietario propone la distribución. El inquilino acepta o disputa.' },
+  ],
+  avTitle: 'Construido sobre Avalanche Fuji Testnet',
+  avLink: 'Ver factory en Snowtrace →',
+  avStats: [{v:'~1s',l:'finalidad de transacción'},{v:'<$0.01',l:'costo por operación'},{v:'99.9%',l:'disponibilidad'}],
+  myContracts: 'Mis contratos',
+  conTitle: 'Contratos', newBtn: '+ Nuevo',
+  secLl: 'Propietario', secTt: 'Inquilino',
+  stCreated: 'Esperando depósito', stFunded: 'Activo', stProposed: 'Propuesta enviada',
+  stDisputed: 'En disputa', stCompleted: 'Completado', stCancelled: 'Cancelado',
+  endsLbl: 'Vence', createdLbl: 'Creado',
+  formTag: 'nuevo contrato', formTitle: 'Crear contrato',
+  formSub: 'El depósito queda bloqueado hasta que ambas partes acuerden.',
+  walletLbl: 'Wallet del inquilino', addrLbl: 'Dirección del inmueble',
+  llNameLbl: 'Tu nombre y apellido', ttNameLbl: 'Nombre y apellido inquilino',
+  daysLbl: 'Duración (días)', amountLbl: 'Garantía (AVAX)',
+  feeLbl: 'Comisión (1%)', depLbl: 'Depósito efectivo',
+  createBtn: 'Crear y bloquear depósito →',
+  contractCreated: 'Contrato creado', redirecting: 'Redirigiendo a tus contratos…', viewTx: 'Ver transacción →',
+  llTag: 'vista propietario', escrowTitle: 'Depósito en escrow',
+  waitingTitle: 'Esperando depósito del inquilino',
+  waitingDesc: 'Compartí este QR o el link con tu inquilino para que deposite la garantía.',
+  copyLink: 'Copiar link',
+  proposeTitle: 'Proponer distribución',
+  proposeDesc: 'Solo podés proponer una vez. El inquilino tiene 7 días para responder.',
+  forTt: 'Para el inquilino (AVAX)', forMe: 'Para mí (AVAX)',
+  totalAvail: 'Total disponible: 0.495 AVAX',
+  proposeBtn: 'Proponer distribución →',
+  proposedTitle: 'Propuesta enviada',
+  propTt: 'Para el inquilino', propLl: 'Para mí', propExp: 'Vence',
+  waitingResp: 'Esperando respuesta del inquilino. Se auto-acepta a los 7 días.',
+  timeoutLbl: 'Si el plazo ya venció:',
+  execTimeout: 'Ejecutar timeout',
+  llDisputed: 'El inquilino rechazó la propuesta. El árbitro debe resolver.',
+  llCompleted: 'Fondos disponibles', llYourPart: 'Tu parte',
+  llWithdraw: 'Retirar 0.297 AVAX →',
+  ttTag: 'vista inquilino',
+  connectWalletTitle: 'Conectá tu wallet',
+  connectWalletDesc: 'Necesitás conectar MetaMask u otra wallet compatible para depositar tu garantía.',
+  connectWalletBtn: 'Conectar wallet →',
+  fundTitle: 'Depositar garantía',
+  fundDesc: 'El propietario creó el contrato. Depositá exactamente 0.495 AVAX para activarlo.',
+  fundBtn: 'Depositar 0.495 AVAX →',
+  fundedStatus: 'Depósito bloqueado — esperando propuesta',
+  fundedDesc: 'El propietario debe proponer cómo distribuir el depósito al finalizar el contrato.',
+  cancelBtn: 'Cancelar contrato', reclaimBtn: 'Reclamar (si venció plazo)',
+  ttProposedTitle: 'Propuesta recibida', ttYourPart: 'Tu parte',
+  propLlLbl: 'Propietario', totalLbl: 'Total',
+  acceptBtn: 'Aceptar y retirar →', rejectBtn: 'Rechazar y pedir árbitro',
+  ttDisputed: 'El árbitro tiene 30 días para resolver. Si no actúa, podés reclamar el depósito completo.',
+  ttCompleted: 'Fondos disponibles', ttWithdraw: 'Retirar 0.297 AVAX →',
+  arbTag: 'vista árbitro', noDispute: 'Sin disputa activa',
+  noDisputeDesc: 'El contrato no está en estado de disputa. No se requiere intervención.',
+  arbDisputed: 'En disputa',
+  origTt: 'Propuesta original (inquilino)', origLl: 'Propuesta original (propietario)',
+  resWindow: 'Tu ventana de resolución', resTitle: 'Resolución final',
+  resDesc: 'Tu decisión es vinculante e irreversible.',
+  forTtArb: 'Para el inquilino (AVAX)', forLlArb: 'Para el propietario (AVAX)',
+  totalDist: 'Total a distribuir: 0.495 AVAX',
+  resolveBtn: 'Emitir resolución →',
+  llLbl: 'Propietario', ttLbl: 'Inquilino', arbLbl: 'Árbitro',
+  expiresOn: 'Vence el', viewOnChain: 'Ver en Snowtrace', backHome: 'Volver al inicio',
+  loading: 'Cargando contrato…',
+  flowTitles: ['Inicio y creación de contrato','Propietario — propuesta y resolución','Inquilino — depósito y resolución','Árbitro'],
+  legend: ['Sistema / automático','Acción del propietario','Acción del inquilino','Acción del árbitro'],
+  branchAccept: ['✓ Acepta','→ Completado'], branchReject: ['✕ Rechaza','→ Disputa'],
+  linkReceived: 'Link recibido',
+  waShare: 'WhatsApp', tgShare: 'Telegram',
+},
+pt: {
+  lang: 'PT', names: { ll: 'Carlos Silva', tt: 'Ana Oliveira', arb: '0xArb1...f2e3' },
+  badge: 'Avalanche · Testnet',
+  heroTitle: 'Depósito de garantia,<br><span style="color:#A07850">protegido na blockchain.</span>',
+  heroSub: 'Sem cartórios. Sem imobiliárias. Só código.',
+  llCard: { tag: 'Proprietário', desc: 'Crie o contrato e defina os termos.' },
+  ttCard: { tag: 'Inquilino',    desc: 'Deposite e recupere sua garantia.' },
+  connectBtn: 'Começar →', noInter: 'Sem custódia. Sem intermediários.',
+  howTitle: 'Como funciona',
+  steps: [
+    { n:'01', t:'O proprietário cria o contrato', d:'Define o valor, o prazo e a wallet do inquilino. Sem papelada.' },
+    { n:'02', t:'O inquilino deposita a garantia', d:'Os fundos ficam bloqueados na blockchain. Ninguém os move sozinho.' },
+    { n:'03', t:'Ambos acordam no final', d:'O proprietário propõe a distribuição. O inquilino aceita ou contesta.' },
+  ],
+  avTitle: 'Construído na Avalanche Fuji Testnet',
+  avLink: 'Ver factory no Snowtrace →',
+  avStats: [{v:'~1s',l:'finalidade de transação'},{v:'<$0.01',l:'custo por operação'},{v:'99.9%',l:'disponibilidade'}],
+  myContracts: 'Meus contratos',
+  conTitle: 'Contratos', newBtn: '+ Novo',
+  secLl: 'Proprietário', secTt: 'Inquilino',
+  stCreated: 'Aguardando depósito', stFunded: 'Ativo', stProposed: 'Proposta enviada',
+  stDisputed: 'Em disputa', stCompleted: 'Concluído', stCancelled: 'Cancelado',
+  endsLbl: 'Vence', createdLbl: 'Criado',
+  formTag: 'novo contrato', formTitle: 'Criar contrato',
+  formSub: 'O depósito fica bloqueado até que ambas as partes concordem.',
+  walletLbl: 'Wallet do inquilino', addrLbl: 'Endereço do imóvel',
+  llNameLbl: 'Seu nome completo', ttNameLbl: 'Nome completo do inquilino',
+  daysLbl: 'Duração (dias)', amountLbl: 'Garantia (AVAX)',
+  feeLbl: 'Taxa (1%)', depLbl: 'Depósito efetivo',
+  createBtn: 'Criar e bloquear depósito →',
+  contractCreated: 'Contrato criado', redirecting: 'Redirecionando para seus contratos…', viewTx: 'Ver transação →',
+  llTag: 'visão proprietário', escrowTitle: 'Depósito em escrow',
+  waitingTitle: 'Aguardando depósito do inquilino',
+  waitingDesc: 'Compartilhe este QR ou link com seu inquilino para depositar a garantia.',
+  copyLink: 'Copiar link',
+  proposeTitle: 'Propor distribuição',
+  proposeDesc: 'Você pode propor apenas uma vez. O inquilino tem 7 dias para responder.',
+  forTt: 'Para o inquilino (AVAX)', forMe: 'Para mim (AVAX)',
+  totalAvail: 'Total disponível: 0.495 AVAX',
+  proposeBtn: 'Propor distribuição →',
+  proposedTitle: 'Proposta enviada',
+  propTt: 'Para o inquilino', propLl: 'Para mim', propExp: 'Vence',
+  waitingResp: 'Aguardando resposta do inquilino. Aceita automaticamente após 7 dias.',
+  timeoutLbl: 'Se o prazo já expirou:',
+  execTimeout: 'Executar timeout',
+  llDisputed: 'O inquilino rejeitou a proposta. O árbitro deve resolver.',
+  llCompleted: 'Fundos disponíveis', llYourPart: 'Sua parte',
+  llWithdraw: 'Sacar 0.297 AVAX →',
+  ttTag: 'visão inquilino',
+  connectWalletTitle: 'Conecte sua wallet',
+  connectWalletDesc: 'Você precisa conectar MetaMask ou outra wallet compatível para depositar sua garantia.',
+  connectWalletBtn: 'Conectar wallet →',
+  fundTitle: 'Depositar garantia',
+  fundDesc: 'O proprietário criou o contrato. Deposite exatamente 0.495 AVAX para ativá-lo.',
+  fundBtn: 'Depositar 0.495 AVAX →',
+  fundedStatus: 'Depósito bloqueado — aguardando proposta',
+  fundedDesc: 'O proprietário deve propor como distribuir o depósito ao final do contrato.',
+  cancelBtn: 'Cancelar contrato', reclaimBtn: 'Reclamar (se vencido)',
+  ttProposedTitle: 'Proposta recebida', ttYourPart: 'Sua parte',
+  propLlLbl: 'Proprietário', totalLbl: 'Total',
+  acceptBtn: 'Aceitar e sacar →', rejectBtn: 'Rejeitar e solicitar árbitro',
+  ttDisputed: 'O árbitro tem 30 dias para resolver. Se não agir, você pode reclamar o depósito completo.',
+  ttCompleted: 'Fundos disponíveis', ttWithdraw: 'Sacar 0.297 AVAX →',
+  arbTag: 'visão árbitro', noDispute: 'Sem disputa ativa',
+  noDisputeDesc: 'O contrato não está em disputa. Nenhuma intervenção necessária.',
+  arbDisputed: 'Em disputa',
+  origTt: 'Proposta original (inquilino)', origLl: 'Proposta original (proprietário)',
+  resWindow: 'Sua janela de resolução', resTitle: 'Resolução final',
+  resDesc: 'Sua decisão é vinculante e irreversível.',
+  forTtArb: 'Para o inquilino (AVAX)', forLlArb: 'Para o proprietário (AVAX)',
+  totalDist: 'Total a distribuir: 0.495 AVAX',
+  resolveBtn: 'Emitir resolução →',
+  llLbl: 'Proprietário', ttLbl: 'Inquilino', arbLbl: 'Árbitro',
+  expiresOn: 'Vence em', viewOnChain: 'Ver no Snowtrace', backHome: 'Voltar ao início',
+  loading: 'Carregando contrato…',
+  flowTitles: ['Início e criação de contrato','Proprietário — proposta e resolução','Inquilino — depósito e resolução','Árbitro'],
+  legend: ['Sistema / automático','Ação do proprietário','Ação do inquilino','Ação do árbitro'],
+  branchAccept: ['✓ Aceita','→ Concluído'], branchReject: ['✕ Rejeita','→ Disputa'],
+  linkReceived: 'Link recebido',
+  waShare: 'WhatsApp', tgShare: 'Telegram',
+}};
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+const logo = () => `<div class="logo-w"><div class="logo-dot"></div><span class="logo-t">GarantYa</span></div>`;
+const avax = () => `<div class="avax-c"><svg width="10" height="10" viewBox="0 0 254 254" fill="none"><circle cx="127" cy="127" r="127" fill="#E84142"/><path d="M155.5 155.5H176l-49-84-49 84h20.5l28.5-49 28.5 49Z" fill="white"/></svg></div>`;
+
+function nav0(t) { // no wallet
+  return `<div class="nav"><div class="nav-in">${logo()}<div class="nav-r"><button class="cbtn">${t.connectBtn}</button></div></div></div>`;
+}
+function nav1(t) { // wallet connected
+  return `<div class="nav"><div class="nav-in">${logo()}<div class="nav-r"><span class="nlink">${t.myContracts}</span><div class="wbtn"><div class="av"></div><span>0x4f2a…3b8c</span></div></div></div></div>`;
+}
+function footer(t) {
+  return `<div class="ft"><div class="ft-in"><span class="flogo">GarantYa</span><span class="fcopy">© 2025 GarantYa</span></div></div>`;
+}
+
+function arr(lbl, role) {
+  return `<div class="arr ${role}"><div class="albl">${lbl}</div><div class="aline"><div class="adash"></div><div class="atip">▶</div></div></div>`;
+}
+
+function phone(num, label, content, mini=false) {
+  return `<div class="pw"><div class="snum">${num} · ${label}</div><div class="phone${mini?' mini':''}">
+${content}
+</div></div>`;
+}
+
+function browser(num, label, url, content) {
+  return `<div class="bw" style="margin-bottom:24px"><div class="snum" style="max-width:960px">D${num} · ${label}</div>
+<div class="browser">
+  <div class="bbar"><div class="wdots"><div class="wd r"></div><div class="wd y"></div><div class="wd g"></div></div><div class="urlbar">${url}</div></div>
+  <div class="bbody">${content}</div>
+</div></div>`;
+}
+
+// QR pattern helper (simplified visual)
+const qrHtml = () => `<div class="qrbox"><div class="qrpat">${Array.from({length:49},(_,i)=>`<div class="${[0,1,2,5,6,7,8,9,13,14,15,17,21,22,23,27,28,29,31,35,36,37,41,42,43,47,48].includes(i)?'qb':'qc'}"></div>`).join('')}</div></div>`;
+
+// Contract info rows (shared)
+function contractInfo(t) {
+  return `<div class="card" style="margin-bottom:10px">
+  <div class="dr"><span class="drl">${t.llLbl}</span><div><span class="nm">${t.names.ll}</span><span class="na">0xLl4f…9a1b</span></div></div>
+  <div class="dr"><span class="drl">${t.ttLbl}</span><div><span class="nm">${t.names.tt}</span><span class="na">0xTt8c…2d3e</span></div></div>
+  <div class="dr"><span class="drl">${t.arbLbl}</span><span class="drv">0xArb1…f2e3</span></div>
+  <div class="dr"><span class="drl">${t.expiresOn}</span><span class="drv nb">31/12/2025</span></div>
+  <div class="dr"><span class="drl">${t.viewOnChain}</span><span class="drv" style="color:#A07850;font-family:inherit">0xAbc1…d2e3 →</span></div>
+</div>`;
+}
+
+// ─── Mobile screens ────────────────────────────────────────────────────────────
+const S = {
+
+// S1: Home / no wallet
+s1(t){ return phone(1, '/', `
+${nav0(t)}
+<div class="ct">
+  <div style="display:inline-flex;align-items:center;gap:5px;border:1.5px solid #E5DFD5;background:white;padding:4px 10px;border-radius:100px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E"><span style="width:5px;height:5px;border-radius:50%;background:#4ADE80;display:inline-block"></span>${t.badge}</div>
+  <div style="font-size:32px;font-weight:900;letter-spacing:-.04em;line-height:1.05;margin:10px 0 6px">${t.heroTitle}</div>
+  <p style="font-size:12px;color:#78716C;line-height:1.6;margin-bottom:14px">${t.heroSub}</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px">
+    <div class="card" style="padding:12px"><div style="width:28px;height:28px;border-radius:9px;background:#1C1917;display:flex;align-items:center;justify-content:center;margin-bottom:7px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8v6H2V8L8 2z" stroke="#F5F0E8" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">${t.llCard.tag}</div><div style="font-size:10px;color:#57534E;margin-top:2px">${t.llCard.desc}</div></div>
+    <div class="card" style="padding:12px"><div style="width:28px;height:28px;border-radius:9px;background:#A07850;display:flex;align-items:center;justify-content:center;margin-bottom:7px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#F5F0E8" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#F5F0E8" stroke-width="1.5" stroke-linecap="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">${t.ttCard.tag}</div><div style="font-size:10px;color:#57534E;margin-top:2px">${t.ttCard.desc}</div></div>
+  </div>
+  <button class="btn pr" style="font-size:13px;padding:13px;margin-top:0">${t.connectBtn}</button>
+  <p style="font-size:10px;color:#A8A29E;text-align:center;margin-top:8px">${t.noInter}</p>
+</div>
+${footer(t)}`);},
+
+// S2: Home / wallet connected
+s2(t){ return phone(2, '/ — wallet', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px">
+    <div class="card" style="padding:12px;border-color:#1C1917"><div style="width:28px;height:28px;border-radius:9px;background:#1C1917;display:flex;align-items:center;justify-content:center;margin-bottom:7px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8v6H2V8L8 2z" stroke="#F5F0E8" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">${t.llCard.tag}</div><div style="font-size:10px;color:#57534E;margin-top:2px">${t.llCard.desc}</div></div>
+    <div class="card" style="padding:12px"><div style="width:28px;height:28px;border-radius:9px;background:#F5F0E8;display:flex;align-items:center;justify-content:center;margin-bottom:7px"><svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="1.5" stroke="#1C1917" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#1C1917" stroke-width="1.5" stroke-linecap="round"/></svg></div><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E">${t.ttCard.tag}</div><div style="font-size:10px;color:#57534E;margin-top:2px">${t.ttCard.desc}</div></div>
+  </div>
+  <div class="stag">${t.howTitle}</div>
+  ${t.steps.map(s=>`<div class="step-c"><div class="step-ic"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8v6H2V8L8 2z" stroke="#A07850" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div><div style="display:flex;align-items:center;gap:5px"><span class="snum2">${s.n}</span><span class="sttl">${s.t}</span></div><p class="sdesc">${s.d}</p></div></div>`).join('')}
+  <div class="card" style="margin-top:12px">
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">${avax()}<span style="font-size:11px;font-weight:700">${t.avTitle}</span></div>
+    <div class="sg">${t.avStats.map(s=>`<div class="sc"><div class="sv">${s.v}</div><div class="sl">${s.l}</div></div>`).join('')}</div>
+    <div style="margin-top:8px;font-size:10px;color:#A8A29E">${t.avLink}</div>
+  </div>
+</div>
+${footer(t)}`);},
+
+// S3: /contracts — create form
+s3(t){ return phone(3, '/contracts — create', `
+${nav1(t)}
+<div class="ct">
+  <div class="stag">${t.formTag}</div>
+  <h2 style="font-size:20px;font-weight:900;letter-spacing:-.03em;margin-bottom:3px">${t.formTitle}</h2>
+  <p style="font-size:11px;color:#78716C;margin-bottom:12px">${t.formSub}</p>
+  <div class="card" style="display:flex;flex-direction:column;gap:0">
+    <div class="inp"><label>${t.walletLbl}</label><input placeholder="0x…" value="0xAb12…ef34" class="mono"/></div>
+    <div class="inp"><label>${t.addrLbl}</label><input value="Av. Corrientes 1234, CABA"/></div>
+    <div class="mframe"><iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-58.3896,-34.6117,-58.3736,-34.5957&layer=mapnik&marker=-34.6037,-58.3816" loading="lazy" title="map"></iframe></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px">
+      <div class="inp"><label>${t.llNameLbl}</label><input value="${t.names.ll}"/></div>
+      <div class="inp"><label>${t.ttNameLbl}</label><input value="${t.names.tt}"/></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+      <div class="inp"><label>${t.daysLbl}</label><input value="365"/></div>
+      <div class="inp"><label>${t.amountLbl}</label><input value="0.5"/></div>
+    </div>
+    <div class="dv"></div>
+    <div class="fee-row"><span style="color:#A8A29E">${t.feeLbl}</span><span style="font-family:monospace;font-weight:700;color:#78716C">0.00500 AVAX</span></div>
+    <div class="fee-row"><span style="font-weight:700;color:#57534E">${t.depLbl}</span><span style="font-size:13px;font-weight:900;color:#A07850">0.49500 AVAX</span></div>
+    <button class="btn pr" style="margin-top:10px">${t.createBtn}</button>
+  </div>
+</div>`);},
+
+// S4: /contract/addr — Created (landlord QR)
+s4(t){ return phone(4, '/contract — Created', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.llTag}</p>
+    <span class="badge gray"><span class="bp"></span>${t.stCreated}</span>
+  </div>
+  <div><p style="font-size:11px;color:#A8A29E;font-weight:700">${t.escrowTitle}</p>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="ah">0.495</span><span style="font-size:16px;color:#78716C;font-weight:600">AVAX</span></div>
+  </div>
+  ${contractInfo(t)}
+  <div class="card amber" style="margin-bottom:10px">
+    <p style="font-size:12px;font-weight:700;color:#78350F;margin-bottom:4px">${t.waitingTitle}</p>
+    <p style="font-size:10px;color:#92400E;line-height:1.5;margin-bottom:10px">${t.waitingDesc}</p>
+    ${qrHtml()}
+    <p style="font-family:monospace;font-size:9px;color:#B45309;text-align:center;margin-top:8px;word-break:break-all">0xAbc1d2e3f4a5b6c7d8e9f0…</p>
+    <div class="share-btns">
+      <div class="sbtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg>${t.waShare}</div>
+      <div class="sbtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="#229ED9"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L8.32 13.617l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.828.942z"/></svg>${t.tgShare}</div>
+    </div>
+    <button style="width:100%;font-size:11px;color:#B45309;background:none;border:none;text-decoration:underline;padding:4px;cursor:pointer">${t.copyLink}</button>
+  </div>
+</div>`);},
+
+// S5: /contracts — list
+s5(t){ return phone(5, '/contracts — list', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <h1 style="font-size:22px;font-weight:900">${t.conTitle}</h1>
+    <button class="btn pr" style="width:auto;padding:6px 12px;margin-top:0;font-size:11px">${t.newBtn}</button>
+  </div>
+  <div class="stag">${t.secLl}</div>
+  <div class="cc">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div><span class="nm">${t.names.tt}</span><span class="na">0xTt8c…2d3e</span></div>
+      <span class="badge amber"><span class="bp"></span>${t.stCreated}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:10px;color:#A8A29E;border-top:1px solid #F5F0E8;padding-top:8px;margin-top:4px">
+      <span style="font-weight:700;color:#A07850">0.495 AVAX</span>
+      <span>·</span><span>${t.endsLbl} 31/12/2025</span>
+    </div>
+  </div>
+</div>`);},
+
+// S6: /contract — Funded state (landlord — propose)
+s6(t){ return phone(6, '/contract — Funded (landlord)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.llTag}</p>
+    <span class="badge green"><span class="bp"></span>${t.stFunded}</span>
+  </div>
+  <div style="margin-bottom:10px"><p style="font-size:11px;color:#A8A29E;font-weight:700">${t.escrowTitle}</p>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="ah">0.495</span><span style="font-size:16px;color:#78716C;font-weight:600">AVAX</span></div>
+  </div>
+  ${contractInfo(t)}
+  <div class="card">
+    <h2 style="font-size:16px;font-weight:900;margin-bottom:6px">${t.proposeTitle}</h2>
+    <p style="font-size:11px;color:#78716C;margin-bottom:10px">${t.proposeDesc}</p>
+    <div class="inp"><label>${t.forTt}</label><input placeholder="0.000" value="0.297"/></div>
+    <div class="inp"><label>${t.forMe}</label><input placeholder="0.000" value="0.198"/></div>
+    <p style="font-size:10px;color:#A8A29E;margin-bottom:4px">${t.totalAvail}</p>
+    <button class="btn pr">${t.proposeBtn}</button>
+  </div>
+</div>`);},
+
+// S7: /contract — DistributionProposed (landlord waiting)
+s7(t){ return phone(7, '/contract — Proposed (landlord)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.llTag}</p>
+    <span class="badge amber"><span class="bp"></span>${t.stProposed}</span>
+  </div>
+  <div style="margin-bottom:10px"><p style="font-size:11px;color:#A8A29E;font-weight:700">${t.escrowTitle}</p>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="ah">0.495</span><span style="font-size:16px;color:#78716C;font-weight:600">AVAX</span></div>
+  </div>
+  <div class="card">
+    <h2 style="font-size:16px;font-weight:900;margin-bottom:8px">${t.proposedTitle}</h2>
+    <div class="dr"><span class="drl">${t.propTt}</span><span class="drv acc">0.297 AVAX</span></div>
+    <div class="dr"><span class="drl">${t.propLl}</span><span class="drv">0.198 AVAX</span></div>
+    <div class="dr"><span class="drl">${t.propExp}</span><span class="drv nb">07/01/2026</span></div>
+    <div class="cdown"><div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#A8A29E;margin-bottom:6px">7 days</div><div class="cg"><div class="cgc"><div class="cgn">06</div><div class="cgu">days</div></div><div class="cgc"><div class="cgn">14</div><div class="cgu">hrs</div></div><div class="cgc"><div class="cgn">22</div><div class="cgu">min</div></div><div class="cgc"><div class="cgn">38</div><div class="cgu">sec</div></div></div></div>
+    <p style="font-size:10px;color:#78716C;margin-top:8px;line-height:1.5">${t.waitingResp}</p>
+    <div class="dv"></div>
+    <p style="font-size:10px;color:#A8A29E;margin-bottom:6px">${t.timeoutLbl}</p>
+    <button class="btn ou" style="margin-top:0">${t.execTimeout}</button>
+  </div>
+</div>`);},
+
+// S8: /contract — Completed, landlord
+s8(t){ return phone(8, '/contract — Completed (landlord)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.llTag}</p>
+    <span class="badge green"><span class="bp"></span>${t.stCompleted}</span>
+  </div>
+  <div style="margin-bottom:10px"><p style="font-size:11px;color:#A8A29E;font-weight:700">${t.llCompleted}</p>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="ah" style="color:#A07850">0.198</span><span style="font-size:16px;color:#78716C;font-weight:600">AVAX</span></div>
+  </div>
+  <div class="card green">
+    <div class="dr"><span class="drl">${t.llYourPart}</span><span class="drv acc">0.198 AVAX</span></div>
+    <div class="dr"><span class="drl">${t.ttLbl}</span><span class="drv">0.297 AVAX</span></div>
+    <button class="btn su">${t.llWithdraw}</button>
+  </div>
+  <div class="tl">
+    <div class="tl-it"><div class="tl-d on"></div><div><div class="tl-t">Contract created</div><div class="tl-dt">01/01/2025</div></div></div>
+    <div class="tl-it"><div class="tl-d on"></div><div><div class="tl-t">Deposit received · 0.495 AVAX</div><div class="tl-dt">02/01/2025</div></div></div>
+    <div class="tl-it"><div class="tl-d on"></div><div><div class="tl-t">Proposal accepted</div><div class="tl-dt">05/01/2025</div></div></div>
+  </div>
+</div>`);},
+
+// S9: /contract — Disputed (landlord)
+s9(t){ return phone(9, '/contract — Disputed (landlord)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.llTag}</p>
+    <span class="badge red"><span class="bp"></span>${t.stDisputed}</span>
+  </div>
+  <div style="margin-bottom:10px"><p style="font-size:11px;color:#A8A29E;font-weight:700">${t.escrowTitle}</p>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="ah">0.495</span><span style="font-size:16px;color:#78716C;font-weight:600">AVAX</span></div>
+  </div>
+  <div class="card red">
+    <span class="badge red" style="margin-bottom:8px"><span class="bp"></span>${t.stDisputed}</span>
+    <p style="font-size:11px;color:#7F1D1D;line-height:1.5">${t.llDisputed}</p>
+  </div>
+</div>`);},
+
+// S10: /contract — Completed post-arbitration (landlord)
+s10(t){ return phone(10, '/contract — Completed (post-arb, landlord)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.llTag}</p>
+    <span class="badge green"><span class="bp"></span>${t.stCompleted}</span>
+  </div>
+  <div class="card green">
+    <h2 style="font-size:15px;font-weight:900;margin-bottom:8px">${t.llCompleted}</h2>
+    <div class="dr"><span class="drl">${t.llYourPart}</span><span class="drv acc">0.148 AVAX</span></div>
+    <div class="splitbar"><div class="sp-t" style="width:70%"></div><div class="sp-l" style="width:30%"></div></div>
+    <button class="btn su" style="margin-top:0">Withdraw 0.148 AVAX →</button>
+  </div>
+</div>`);},
+
+// S11: Link received (mini — conceptual)
+s11(t){ return phone('—', t.linkReceived, `
+${nav0(t)}
+<div class="ct" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 14px;text-align:center">
+  <div style="width:48px;height:48px;border-radius:14px;background:#25D366;display:flex;align-items:center;justify-content:center;margin-bottom:12px"><svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/></svg></div>
+  <p style="font-size:11px;font-weight:700;color:#1C1917;margin-bottom:4px">GarantYa</p>
+  <p style="font-size:10px;color:#78716C;line-height:1.5">🔐 ${t.waitingTitle}<br>garantya.app/contract/0xAbc1…</p>
+  <div style="margin-top:10px;background:white;border:1.5px solid #E5DFD5;border-radius:10px;padding:8px 12px;font-size:10px;font-weight:700;color:#1C1917">Open link →</div>
+</div>`, true);},
+
+// S12: /contract — no wallet (tenant)
+s12(t){ return phone(12, '/contract — no wallet', `
+${nav0(t)}
+<div class="ct">
+  <p class="stag" style="margin-bottom:6px">${t.ttTag}</p>
+  ${contractInfo(t)}
+  <div class="card" style="text-align:center;padding:20px 14px">
+    <div class="wi-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" stroke="#1C1917" stroke-width="1.5"/><path d="M16 7V5a2 2 0 0 0-4 0v2M12 13v2" stroke="#1C1917" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="13" r="1" fill="#1C1917"/></svg></div>
+    <p style="font-size:13px;font-weight:700;color:#1C1917;margin-bottom:6px">${t.connectWalletTitle}</p>
+    <p style="font-size:11px;color:#78716C;line-height:1.5;margin-bottom:14px">${t.connectWalletDesc}</p>
+    <button class="btn pr" style="margin-top:0">${t.connectWalletBtn}</button>
+  </div>
+</div>`);},
+
+// S13: /contract — deposit (tenant, Created state)
+s13(t){ return phone(13, '/contract — deposit', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.ttTag}</p>
+    <span class="badge gray"><span class="bp"></span>${t.stCreated}</span>
+  </div>
+  <div style="margin-bottom:10px"><p style="font-size:11px;color:#A8A29E;font-weight:700">${t.fundTitle}</p>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="ah">0.495</span><span style="font-size:16px;color:#78716C;font-weight:600">AVAX</span></div>
+  </div>
+  ${contractInfo(t)}
+  <div class="card amber">
+    <p style="font-size:11px;color:#78350F;line-height:1.5;margin-bottom:10px">${t.fundDesc}</p>
+    <button class="btn pr">${t.fundBtn}</button>
+  </div>
+</div>`);},
+
+// S14: /contract — Funded (tenant — active)
+s14(t){ return phone(14, '/contract — Funded (tenant)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.ttTag}</p>
+    <span class="badge green"><span class="bp"></span>${t.stFunded}</span>
+  </div>
+  <div style="margin-bottom:10px"><p style="font-size:11px;color:#A8A29E;font-weight:700">${t.fundedStatus}</p>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="ah">0.495</span><span style="font-size:16px;color:#78716C;font-weight:600">AVAX</span></div>
+  </div>
+  ${contractInfo(t)}
+  <div class="card">
+    <p style="font-size:11px;color:#78716C;line-height:1.5;margin-bottom:10px">${t.fundedDesc}</p>
+    <button class="btn ou">${t.cancelBtn}</button>
+    <button class="btn ou" style="font-size:11px;color:#A8A29E;border-color:transparent;margin-top:4px">${t.reclaimBtn}</button>
+  </div>
+</div>`);},
+
+// S15: /contract — DistributionProposed (tenant — accept/reject)
+s15(t){ return phone(15, '/contract — Proposed (tenant)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.ttTag}</p>
+    <span class="badge amber"><span class="bp"></span>${t.stProposed}</span>
+  </div>
+  <div style="margin-bottom:10px"><p style="font-size:11px;color:#A8A29E;font-weight:700">${t.ttProposedTitle}</p>
+    <div style="display:flex;align-items:baseline;gap:6px;margin-top:2px"><span class="ah">0.495</span><span style="font-size:16px;color:#78716C;font-weight:600">AVAX</span></div>
+  </div>
+  <div class="card">
+    <div class="dr"><span class="drl">${t.ttYourPart}</span><span class="drv acc">0.297 AVAX</span></div>
+    <div class="dr"><span class="drl">${t.propLlLbl}</span><span class="drv">0.198 AVAX</span></div>
+    <div class="dr"><span class="drl">${t.totalLbl}</span><span class="drv">0.495 AVAX</span></div>
+    <div class="splitbar" style="margin-top:10px"><div class="sp-t" style="width:60%"></div><div class="sp-l" style="width:40%"></div></div>
+    <div class="cdown"><div class="cg"><div class="cgc"><div class="cgn">06</div><div class="cgu">days</div></div><div class="cgc"><div class="cgn">14</div><div class="cgu">hrs</div></div><div class="cgc"><div class="cgn">22</div><div class="cgu">min</div></div><div class="cgc"><div class="cgn">38</div><div class="cgu">sec</div></div></div></div>
+    <button class="btn su">${t.acceptBtn}</button>
+    <button class="btn da" style="margin-top:6px">${t.rejectBtn}</button>
+  </div>
+</div>`);},
+
+// S16: /contract — Completed (tenant — accept)
+s16(t){ return phone(16, '/contract — Completed (tenant accept)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.ttTag}</p>
+    <span class="badge green"><span class="bp"></span>${t.stCompleted}</span>
+  </div>
+  <div class="card green">
+    <h2 style="font-size:15px;font-weight:900;margin-bottom:8px">${t.ttCompleted}</h2>
+    <div class="dr"><span class="drl">${t.ttYourPart}</span><span class="drv acc">0.297 AVAX</span></div>
+    <div class="splitbar"><div class="sp-t" style="width:60%"></div><div class="sp-l" style="width:40%"></div></div>
+    <button class="btn su" style="margin-top:0">${t.ttWithdraw}</button>
+  </div>
+</div>`);},
+
+// S17: /contract — Disputed (tenant)
+s17(t){ return phone(17, '/contract — Disputed (tenant)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.ttTag}</p>
+    <span class="badge red"><span class="bp"></span>${t.stDisputed}</span>
+  </div>
+  <div class="card red">
+    <span class="badge red" style="margin-bottom:8px"><span class="bp"></span>${t.stDisputed}</span>
+    <p style="font-size:11px;color:#7F1D1D;line-height:1.5;margin-bottom:10px">${t.ttDisputed}</p>
+    <button class="btn ou" style="font-size:11px">Claim (arbitrator inactivity)</button>
+  </div>
+</div>`);},
+
+// S18: /contract — Completed post-arbitration (tenant)
+s18(t){ return phone(18, '/contract — Completed (post-arb, tenant)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.ttTag}</p>
+    <span class="badge green"><span class="bp"></span>${t.stCompleted}</span>
+  </div>
+  <div class="card green">
+    <h2 style="font-size:15px;font-weight:900;margin-bottom:8px">${t.ttCompleted}</h2>
+    <div class="dr"><span class="drl">${t.ttYourPart}</span><span class="drv acc">0.347 AVAX</span></div>
+    <div class="splitbar"><div class="sp-t" style="width:70%"></div><div class="sp-l" style="width:30%"></div></div>
+    <button class="btn su" style="margin-top:0">Withdraw 0.347 AVAX →</button>
+  </div>
+</div>`);},
+
+// S19: /contract — Arbitrator, no dispute
+s19(t){ return phone(19, '/contract — Arbitrator (no dispute)', `
+${nav1(t)}
+<div class="ct">
+  <p class="stag">${t.arbTag}</p>
+  ${contractInfo(t)}
+  <div class="card">
+    <h2 style="font-size:15px;font-weight:900;margin-bottom:6px">${t.noDispute}</h2>
+    <p style="font-size:11px;color:#78716C">${t.noDisputeDesc}</p>
+  </div>
+</div>`);},
+
+// S20: /contract — Arbitrator, active dispute + resolve
+s20(t){ return phone(20, '/contract — Arbitrator (dispute)', `
+${nav1(t)}
+<div class="ct">
+  <div style="display:flex;align-items:start;justify-content:space-between;margin-bottom:6px">
+    <p class="stag">${t.arbTag}</p>
+    <span class="badge red"><span class="bp"></span>${t.stDisputed}</span>
+  </div>
+  <div class="card red" style="margin-bottom:10px">
+    <span class="badge red" style="margin-bottom:8px"><span class="bp"></span>${t.arbDisputed}</span>
+    <div class="dr"><span class="drl">${t.origTt}</span><span class="drv acc">0.297 AVAX</span></div>
+    <div class="dr"><span class="drl">${t.origLl}</span><span class="drv">0.198 AVAX</span></div>
+    <div class="dv"></div>
+    <p style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E;margin-bottom:4px">${t.resWindow}</p>
+    <div class="cg" style="margin-bottom:0"><div class="cgc"><div class="cgn">29</div><div class="cgu">days</div></div><div class="cgc"><div class="cgn">04</div><div class="cgu">hrs</div></div><div class="cgc"><div class="cgn">11</div><div class="cgu">min</div></div><div class="cgc"><div class="cgn">55</div><div class="cgu">sec</div></div></div>
+  </div>
+  <div class="card purple">
+    <h2 style="font-size:14px;font-weight:900;margin-bottom:4px">${t.resTitle}</h2>
+    <p style="font-size:10px;color:#5B21B6;margin-bottom:8px">${t.resDesc}</p>
+    <div class="inp"><label>${t.forTtArb}</label><input placeholder="0.000" value="0.347"/></div>
+    <div class="inp"><label>${t.forLlArb}</label><input placeholder="0.000" value="0.148"/></div>
+    <p style="font-size:10px;color:#A8A29E;margin-bottom:4px">${t.totalDist}</p>
+    <button class="btn pu">${t.resolveBtn}</button>
+  </div>
+</div>`);},
+
+}; // end S
+
+// ─── Desktop screens ───────────────────────────────────────────────────────────
+const D = {
+
+d1(t){ return browser(1, '/ (no wallet)', 'garantya.app', `
+<div style="max-width:600px;margin:0 auto;padding:48px 40px">
+  ${nav0(t)}
+  <div style="padding:40px 0 20px">
+    <div style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid #E5DFD5;background:white;padding:5px 12px;border-radius:100px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E;margin-bottom:20px"><span style="width:6px;height:6px;border-radius:50%;background:#4ADE80;display:inline-block"></span>${t.badge}</div>
+    <div style="font-size:52px;font-weight:900;letter-spacing:-.04em;line-height:1;margin-bottom:12px">${t.heroTitle}</div>
+    <p style="font-size:16px;color:#78716C;line-height:1.6;margin-bottom:28px">${t.heroSub}</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:480px;margin-bottom:28px">
+      <div class="card" style="padding:18px"><div style="width:36px;height:36px;border-radius:11px;background:#1C1917;display:flex;align-items:center;justify-content:center;margin-bottom:10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L14 8v6H2V8L8 2z" stroke="#F5F0E8" stroke-width="1.5" stroke-linejoin="round"/></svg></div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E;margin-bottom:4px">${t.llCard.tag}</div><div style="font-size:13px;color:#57534E">${t.llCard.desc}</div></div>
+      <div class="card" style="padding:18px"><div style="width:36px;height:36px;border-radius:11px;background:#A07850;display:flex;align-items:center;justify-content:center;margin-bottom:10px"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="#F5F0E8" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="#F5F0E8" stroke-width="1.5" stroke-linecap="round"/></svg></div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E;margin-bottom:4px">${t.ttCard.tag}</div><div style="font-size:13px;color:#57534E">${t.ttCard.desc}</div></div>
+    </div>
+    <button class="btn pr" style="max-width:280px;font-size:14px;padding:14px">${t.connectBtn}</button>
+  </div>
+</div>`);},
+
+d2(t){ return browser(2, '/contracts — create form', 'garantya.app/contracts', `
+<div style="max-width:680px;margin:0 auto;padding:32px 40px">
+  ${nav1(t)}
+  <div style="padding-top:32px">
+    <div class="stag">${t.formTag}</div>
+    <h1 style="font-size:28px;font-weight:900;margin-bottom:6px">${t.formTitle}</h1>
+    <p style="font-size:13px;color:#78716C;margin-bottom:20px">${t.formSub}</p>
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:20px">
+      <div class="card">
+        <div class="inp"><label>${t.walletLbl}</label><input placeholder="0x…" value="0xAb12…ef34"/></div>
+        <div class="inp"><label>${t.addrLbl}</label><input value="Av. Corrientes 1234, CABA"/></div>
+        <div class="mframe" style="height:160px"><iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-58.3896,-34.6117,-58.3736,-34.5957&layer=mapnik&marker=-34.6037,-58.3816" loading="lazy" title="map"></iframe></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+          <div class="inp"><label>${t.llNameLbl}</label><input value="${t.names.ll}"/></div>
+          <div class="inp"><label>${t.ttNameLbl}</label><input value="${t.names.tt}"/></div>
+          <div class="inp"><label>${t.daysLbl}</label><input value="365"/></div>
+          <div class="inp"><label>${t.amountLbl}</label><input value="0.5"/></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="fee-row" style="font-size:12px"><span style="color:#A8A29E">${t.feeLbl}</span><span style="font-family:monospace;font-weight:700;color:#78716C">0.00500 AVAX</span></div>
+          <div class="fee-row" style="font-size:13px"><span style="font-weight:700">${t.depLbl}</span><span style="font-weight:900;color:#A07850">0.49500 AVAX</span></div>
+        </div>
+        <button class="btn pr">${t.createBtn}</button>
+      </div>
+    </div>
+  </div>
+</div>`);},
+
+d3(t){ return browser(3, '/contract — Created (landlord)', 'garantya.app/contract/0xAbc…', `
+<div style="display:grid;grid-template-columns:1fr 380px;height:100%">
+  <div style="padding:32px 28px;border-right:1px solid #E5DFD5">
+    ${nav1(t)}
+    <div style="padding-top:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span class="stag">${t.llTag}</span>
+        <span class="badge gray"><span class="bp"></span>${t.stCreated}</span>
+      </div>
+      <p style="font-size:13px;color:#A8A29E;font-weight:700">${t.escrowTitle}</p>
+      <div style="display:flex;align-items:baseline;gap:8px;margin:4px 0 16px"><span style="font-size:44px;font-weight:900;letter-spacing:-.04em">0.495</span><span style="font-size:20px;color:#78716C;font-weight:600">AVAX</span></div>
+      ${contractInfo(t)}
+    </div>
+  </div>
+  <div style="padding:32px 24px;overflow-y:auto">
+    <div class="card amber">
+      <p style="font-size:13px;font-weight:800;color:#78350F;margin-bottom:6px">${t.waitingTitle}</p>
+      <p style="font-size:11px;color:#92400E;line-height:1.5;margin-bottom:14px">${t.waitingDesc}</p>
+      ${qrHtml()}
+      <p style="font-family:monospace;font-size:9px;color:#B45309;text-align:center;margin:10px 0;word-break:break-all">garantya.app/contract/0xAbc1d2e3…</p>
+      <div class="share-btns">
+        <div class="sbtn">${t.waShare}</div>
+        <div class="sbtn">${t.tgShare}</div>
+      </div>
+      <button style="width:100%;font-size:11px;color:#B45309;background:none;border:none;text-decoration:underline;padding:6px;cursor:pointer">${t.copyLink}</button>
+    </div>
+  </div>
+</div>`);},
+
+d4(t){ return browser(4, '/contract — Funded (landlord propose)', 'garantya.app/contract/0xAbc…', `
+<div style="display:grid;grid-template-columns:1fr 380px;height:100%">
+  <div style="padding:32px 28px;border-right:1px solid #E5DFD5">
+    ${nav1(t)}
+    <div style="padding-top:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span class="stag">${t.llTag}</span>
+        <span class="badge green"><span class="bp"></span>${t.stFunded}</span>
+      </div>
+      <p style="font-size:13px;color:#A8A29E;font-weight:700">${t.escrowTitle}</p>
+      <div style="display:flex;align-items:baseline;gap:8px;margin:4px 0 16px"><span style="font-size:44px;font-weight:900;letter-spacing:-.04em">0.495</span><span style="font-size:20px;color:#78716C;font-weight:600">AVAX</span></div>
+      ${contractInfo(t)}
+    </div>
+  </div>
+  <div style="padding:32px 24px">
+    <div class="card">
+      <h2 style="font-size:18px;font-weight:900;margin-bottom:6px">${t.proposeTitle}</h2>
+      <p style="font-size:12px;color:#78716C;margin-bottom:12px">${t.proposeDesc}</p>
+      <div class="inp"><label>${t.forTt}</label><input placeholder="0.000" value="0.297"/></div>
+      <div class="inp"><label>${t.forMe}</label><input placeholder="0.000" value="0.198"/></div>
+      <p style="font-size:11px;color:#A8A29E;margin-bottom:8px">${t.totalAvail}</p>
+      <button class="btn pr">${t.proposeBtn}</button>
+    </div>
+  </div>
+</div>`);},
+
+d5(t){ return browser(5, '/contract — Proposal received (tenant)', 'garantya.app/contract/0xAbc…', `
+<div style="display:grid;grid-template-columns:1fr 380px;height:100%">
+  <div style="padding:32px 28px;border-right:1px solid #E5DFD5">
+    ${nav1(t)}
+    <div style="padding-top:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span class="stag">${t.ttTag}</span>
+        <span class="badge amber"><span class="bp"></span>${t.stProposed}</span>
+      </div>
+      <p style="font-size:13px;color:#A8A29E;font-weight:700">${t.ttProposedTitle}</p>
+      <div style="display:flex;align-items:baseline;gap:8px;margin:4px 0 16px"><span style="font-size:44px;font-weight:900;letter-spacing:-.04em">0.495</span><span style="font-size:20px;color:#78716C;font-weight:600">AVAX</span></div>
+      ${contractInfo(t)}
+    </div>
+  </div>
+  <div style="padding:32px 24px">
+    <div class="card" style="margin-bottom:12px">
+      <div class="dr"><span class="drl">${t.ttYourPart}</span><span class="drv acc" style="font-size:16px">0.297 AVAX</span></div>
+      <div class="dr"><span class="drl">${t.propLlLbl}</span><span class="drv">0.198 AVAX</span></div>
+      <div class="splitbar" style="margin-top:10px"><div class="sp-t" style="width:60%"></div><div class="sp-l" style="width:40%"></div></div>
+      <div class="cdown"><div class="cg"><div class="cgc"><div class="cgn">06</div><div class="cgu">days</div></div><div class="cgc"><div class="cgn">14</div><div class="cgu">hrs</div></div><div class="cgc"><div class="cgn">22</div><div class="cgu">min</div></div><div class="cgc"><div class="cgn">38</div><div class="cgu">sec</div></div></div></div>
+    </div>
+    <button class="btn su">${t.acceptBtn}</button>
+    <button class="btn da" style="margin-top:8px">${t.rejectBtn}</button>
+  </div>
+</div>`);},
+
+d6(t){ return browser(6, '/contract — no wallet (tenant)', 'garantya.app/contract/0xAbc…', `
+<div style="max-width:680px;margin:0 auto;padding:32px 40px">
+  ${nav0(t)}
+  <div style="padding-top:28px">
+    <p class="stag">${t.ttTag}</p>
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;margin-top:16px">
+      ${contractInfo(t)}
+      <div class="card" style="text-align:center;padding:28px 20px">
+        <div class="wi-ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="7" width="20" height="14" rx="2" stroke="#1C1917" stroke-width="1.5"/><path d="M16 7V5a2 2 0 0 0-4 0v2M12 13v2" stroke="#1C1917" stroke-width="1.5" stroke-linecap="round"/><circle cx="12" cy="13" r="1" fill="#1C1917"/></svg></div>
+        <p style="font-size:15px;font-weight:700;margin-bottom:8px">${t.connectWalletTitle}</p>
+        <p style="font-size:12px;color:#78716C;line-height:1.5;margin-bottom:16px">${t.connectWalletDesc}</p>
+        <button class="btn pr">${t.connectWalletBtn}</button>
+      </div>
+    </div>
+  </div>
+</div>`);},
+
+d7(t){ return browser(7, '/contract — Disputed (arbitrator)', 'garantya.app/contract/0xAbc…', `
+<div style="display:grid;grid-template-columns:1fr 380px;height:100%">
+  <div style="padding:32px 28px;border-right:1px solid #E5DFD5">
+    ${nav1(t)}
+    <div style="padding-top:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span class="stag">${t.arbTag}</span>
+        <span class="badge red"><span class="bp"></span>${t.stDisputed}</span>
+      </div>
+      <p style="font-size:13px;color:#A8A29E;font-weight:700">${t.arbDisputed}</p>
+      <div style="display:flex;align-items:baseline;gap:8px;margin:4px 0 16px"><span style="font-size:44px;font-weight:900;letter-spacing:-.04em">0.495</span><span style="font-size:20px;color:#78716C;font-weight:600">AVAX</span></div>
+      ${contractInfo(t)}
+    </div>
+  </div>
+  <div style="padding:32px 24px;overflow-y:auto">
+    <div class="card red" style="margin-bottom:12px">
+      <div class="dr"><span class="drl">${t.origTt}</span><span class="drv acc">0.297 AVAX</span></div>
+      <div class="dr"><span class="drl">${t.origLl}</span><span class="drv">0.198 AVAX</span></div>
+      <div class="dv"></div>
+      <p style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#A8A29E;margin-bottom:6px">${t.resWindow}</p>
+      <div class="cg"><div class="cgc"><div class="cgn">29</div><div class="cgu">days</div></div><div class="cgc"><div class="cgn">04</div><div class="cgu">hrs</div></div><div class="cgc"><div class="cgn">11</div><div class="cgu">min</div></div><div class="cgc"><div class="cgn">55</div><div class="cgu">sec</div></div></div>
+    </div>
+    <div class="card purple">
+      <h2 style="font-size:16px;font-weight:900;margin-bottom:6px">${t.resTitle}</h2>
+      <p style="font-size:11px;color:#5B21B6;margin-bottom:10px">${t.resDesc}</p>
+      <div class="inp"><label>${t.forTtArb}</label><input placeholder="0.000" value="0.347"/></div>
+      <div class="inp"><label>${t.forLlArb}</label><input placeholder="0.000" value="0.148"/></div>
+      <p style="font-size:11px;color:#A8A29E;margin-bottom:8px">${t.totalDist}</p>
+      <button class="btn pu">${t.resolveBtn}</button>
+    </div>
+  </div>
+</div>`);},
+
+d8(t){ return browser(8, '/contracts — list', 'garantya.app/contracts', `
+<div style="max-width:680px;margin:0 auto;padding:32px 40px">
+  ${nav1(t)}
+  <div style="padding-top:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h1 style="font-size:28px;font-weight:900">${t.conTitle}</h1>
+      <button class="btn pr" style="width:auto;padding:8px 16px;margin-top:0;font-size:12px">${t.newBtn}</button>
+    </div>
+    <div class="stag" style="margin-bottom:8px">${t.secLl}</div>
+    <div class="cc" style="display:flex;align-items:center;justify-content:space-between;padding:14px">
+      <div><span class="nm">${t.names.tt}</span><span class="na">0xTt8c…2d3e</span></div>
+      <div style="text-align:right"><span class="badge amber"><span class="bp"></span>${t.stCreated}</span><p style="font-size:10px;color:#A8A29E;margin-top:4px">0.495 AVAX · ${t.endsLbl} 31/12/2025</p></div>
+    </div>
+    <div class="stag" style="margin-top:16px;margin-bottom:8px">${t.secTt}</div>
+    <div style="background:white;border:1.5px solid #E5DFD5;border-radius:14px;padding:24px;text-align:center;color:#A8A29E;font-size:12px">No contracts as tenant.</div>
+  </div>
+</div>`);},
+
+}; // end D
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+let currentLang = 'en';
+let currentView = 'mobile';
+
+function renderMobile(t) {
+  const f1Title = t.flowTitles[0];
+  const f2Title = t.flowTitles[1];
+  const f3Title = t.flowTitles[2];
+  const f4Title = t.flowTitles[3];
+
+  return `
+<div style="margin-bottom:8px">
+  <div style="font-size:28px;font-weight:900;letter-spacing:-.03em;margin-bottom:4px">GarantYa — Mockup</div>
+  <p style="font-size:13px;color:#78716C;margin-bottom:20px">4 flows · 20 screens · Avalanche Fuji Testnet</p>
+  <div class="legend">
+    <div class="li"><div class="ldot" style="background:#1C1917"></div>${t.legend[0]}</div>
+    <div class="li"><div class="ldot" style="background:#F59E0B"></div>${t.legend[1]}</div>
+    <div class="li"><div class="ldot" style="background:#A07850"></div>${t.legend[2]}</div>
+    <div class="li"><div class="ldot" style="background:#7C3AED"></div>${t.legend[3]}</div>
+  </div>
+</div>
+
+<!-- Flow 1 -->
+<div class="flow-sec">
+  <div class="flow-lbl">Flow 1</div>
+  <div class="flow-ttl">${f1Title}</div>
+  <div class="flow-row">
+    ${S.s1(t)}
+    ${arr('Connect wallet','sys')}
+    ${S.s2(t)}
+    ${arr(t.llCard.tag,'ll')}
+    ${S.s3(t)}
+    ${arr('Deploy →','sys')}
+    ${S.s4(t)}
+    ${arr('Created','sys')}
+    ${S.s5(t)}
+  </div>
+</div>
+
+<!-- Flow 2 — Landlord -->
+<div class="flow-sec">
+  <div class="flow-lbl">Flow 2</div>
+  <div class="flow-ttl">${f2Title}</div>
+  <div class="flow-row">
+    ${phone('↑5', t.stCreated, `${nav1(t)}<div class="ct"><p style="font-size:11px;color:#A8A29E;text-align:center;padding:16px 0">← ${t.stCreated}</p></div>`, true)}
+    ${arr(t.names.tt+' deposits','tt')}
+    ${S.s6(t)}
+    ${arr(t.proposeBtn.replace(' →',''),'ll')}
+    ${S.s7(t)}
+  </div>
+  <div class="bsec" style="padding-left:${180+56+300+56}px">
+    <div class="bvcol"><div class="bvline" style="height:20px"></div></div>
+    <div class="bcols">
+      <div class="bcol bc-acc">
+        <div class="bva"><div class="bvlbl">${t.branchAccept[0]}</div><div class="bvsym">↓</div></div>
+        <div class="flow-row">${S.s8(t)}</div>
+      </div>
+      <div class="bcol bc-rej">
+        <div class="bva"><div class="bvlbl">${t.branchReject[0]}</div><div class="bvsym">↓</div></div>
+        <div class="flow-row">${S.s9(t)} ${arr('Arbitrator resolves','arb')} ${S.s10(t)}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Flow 3 — Tenant -->
+<div class="flow-sec">
+  <div class="flow-lbl">Flow 3</div>
+  <div class="flow-ttl">${f3Title}</div>
+  <div class="flow-row">
+    ${S.s11(t)}
+    ${arr('Opens link','tt')}
+    ${S.s12(t)}
+    ${arr('Connect wallet','sys')}
+    ${S.s13(t)}
+    ${arr('Deposit','tt')}
+    ${S.s14(t)}
+    ${arr('Proposal received','sys')}
+    ${S.s15(t)}
+  </div>
+  <div class="bsec" style="padding-left:${180+56+300+56+300+56+300+56}px">
+    <div class="bvcol"><div class="bvline" style="height:20px"></div></div>
+    <div class="bcols">
+      <div class="bcol bc-acc">
+        <div class="bva"><div class="bvlbl">${t.branchAccept[0]}</div><div class="bvsym">↓</div></div>
+        <div class="flow-row">${S.s16(t)}</div>
+      </div>
+      <div class="bcol bc-rej">
+        <div class="bva"><div class="bvlbl">${t.branchReject[0]}</div><div class="bvsym">↓</div></div>
+        <div class="flow-row">${S.s17(t)} ${arr('Arbitrator resolves','arb')} ${S.s18(t)}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Flow 4 — Arbitrator -->
+<div class="flow-sec">
+  <div class="flow-lbl">Flow 4</div>
+  <div class="flow-ttl">${f4Title}</div>
+  <div class="flow-row">
+    ${phone('↑5', t.stDisputed, `${nav1(t)}<div class="ct"><p style="font-size:11px;color:#A8A29E;text-align:center;padding:16px 0">← ${t.stDisputed}</p></div>`, true)}
+    ${arr('Opens contract','arb')}
+    ${S.s19(t)}
+    ${arr('Dispute active','sys')}
+    ${S.s20(t)}
+  </div>
+</div>
+`;
+}
+
+function renderDesktop(t) {
+  return `
+<div style="margin-bottom:32px">
+  <div style="font-size:28px;font-weight:900;letter-spacing:-.03em;margin-bottom:4px">GarantYa — Desktop Mockup</div>
+  <p style="font-size:13px;color:#78716C;margin-bottom:28px">8 key screens · 960px wide · Avalanche Fuji Testnet</p>
+</div>
+${D.d1(t)}
+${D.d2(t)}
+${D.d3(t)}
+${D.d4(t)}
+${D.d5(t)}
+${D.d6(t)}
+${D.d7(t)}
+${D.d8(t)}
+`;
+}
+
+function render() {
+  const t = T[currentLang];
+  if (currentView === 'mobile') {
+    document.getElementById('mobile-sec').innerHTML = renderMobile(t);
+  } else {
+    document.getElementById('desktop-sec').innerHTML = renderDesktop(t);
+  }
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('#lang-tabs .tab').forEach(b => b.classList.toggle('active', b.textContent === lang.toUpperCase()));
+  render();
+}
+
+function setView(view) {
+  currentView = view;
+  document.getElementById('mobile-sec').style.display  = view === 'mobile'  ? '' : 'none';
+  document.getElementById('desktop-sec').style.display = view === 'desktop' ? '' : 'none';
+  document.querySelectorAll('#view-tabs .tab').forEach(b => {
+    b.classList.toggle('active', b.textContent.includes(view === 'mobile' ? 'Mobile' : 'Desktop'));
+  });
+  render();
+}
+
+// Init
+render();
+</script>
+</body>
+</html>

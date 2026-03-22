@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { type Address, isAddress } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
@@ -8,6 +9,7 @@ import { useEscrow } from "@/lib/hooks/useEscrow";
 import { Badge } from "@/components/ui/Badge";
 import Link from "next/link";
 import { useT } from "@/contexts/LanguageContext";
+import { supabase, type ContractMetadata } from "@/lib/supabase";
 
 // Lazy-load role views — only ONE is ever rendered per session.
 // This splits each view into its own chunk, saving ~8-15 kB per unused role.
@@ -28,6 +30,17 @@ export default function ContratoPage({ params }: Readonly<PageProps>) {
   const { t } = useT();
 
   const escrow = useEscrow(contractAddress);
+  const [meta, setMeta] = useState<ContractMetadata | undefined>(undefined);
+
+  useEffect(() => {
+    supabase
+      .from("contracts")
+      .select("*")
+      .eq("address", contractAddress.toLowerCase())
+
+      .single()
+      .then(({ data }) => { if (data) setMeta(data as ContractMetadata); });
+  }, [contractAddress]);
 
   if (!isConnected) {
     return (
@@ -86,9 +99,9 @@ export default function ContratoPage({ params }: Readonly<PageProps>) {
 
   return (
     <div className="space-y-5">
-      {escrow.role === "tenant"     && <TenantView     address={contractAddress} escrow={escrow} />}
-      {escrow.role === "landlord"   && <LandlordView   address={contractAddress} escrow={escrow} />}
-      {escrow.role === "arbitrator" && <ArbitratorView address={contractAddress} escrow={escrow} />}
+      {escrow.role === "tenant"     && <TenantView     address={contractAddress} escrow={escrow} meta={meta} />}
+      {escrow.role === "landlord"   && <LandlordView   address={contractAddress} escrow={escrow} meta={meta} />}
+      {escrow.role === "arbitrator" && <ArbitratorView address={contractAddress} escrow={escrow} meta={meta} />}
       <EventTimeline address={contractAddress} />
     </div>
   );
