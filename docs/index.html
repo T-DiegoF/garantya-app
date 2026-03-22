@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GarantYa — Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#F5F0E8;color:#1C1917;-webkit-font-smoothing:antialiased;min-height:100vh}
+.wrap{max-width:760px;margin:0 auto;padding:56px 24px 80px}
+.logo{display:flex;align-items:center;gap:7px;margin-bottom:40px}
+.logo-dot{width:9px;height:9px;border-radius:50%;background:#A07850}
+.logo-txt{font-size:18px;font-weight:900;letter-spacing:-.03em}
+h1{font-size:38px;font-weight:900;letter-spacing:-.04em;line-height:1;margin-bottom:8px}
+h1 span{color:#A07850}
+.sub{font-size:15px;color:#78716C;margin-bottom:48px;line-height:1.6}
+/* Section */
+.sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.18em;color:#A8A29E;margin-bottom:12px}
+.cards{display:flex;flex-direction:column;gap:10px;margin-bottom:48px}
+/* Card */
+.card{display:flex;align-items:center;gap:16px;background:white;border:1.5px solid #E5DFD5;border-radius:16px;padding:18px 20px;text-decoration:none;color:inherit;transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:#A07850;box-shadow:0 4px 24px rgba(160,120,80,.12)}
+.card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px}
+.card-body{flex:1}
+.card-title{font-size:15px;font-weight:800;color:#1C1917;margin-bottom:3px}
+.card-desc{font-size:12px;color:#78716C;line-height:1.5}
+.card-url{font-size:11px;font-family:monospace;color:#A07850;margin-top:5px}
+.card-arrow{font-size:18px;color:#C4B5A5;flex-shrink:0}
+.card:hover .card-arrow{color:#A07850}
+/* Badge */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;background:#DCFCE7;color:#166534;margin-left:8px;vertical-align:middle}
+.badge-new{background:#EDE9FE;color:#5B21B6}
+/* Divider */
+.dv{border-top:1.5px solid #E5DFD5;margin:8px 0 48px}
+/* Contract states */
+.states{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:48px}
+.state{background:white;border:1.5px solid #E5DFD5;border-radius:12px;padding:12px 14px}
+.state-name{font-size:12px;font-weight:700;margin-bottom:3px}
+.state-desc{font-size:11px;color:#78716C;line-height:1.4}
+/* Footer */
+.ft{font-size:11px;color:#A8A29E;padding-top:32px;border-top:1px solid #E5DFD5}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-txt">GarantYa</span>
+  </div>
+
+  <h1>Developer <span>Docs</span></h1>
+  <p class="sub">Rental guarantee escrow on Avalanche Fuji Testnet.<br>Blockchain · No notaries · No intermediaries.</p>
+
+  <!-- Mockups — top priority -->
+  <div class="sec-lbl">Interactive Mockups</div>
+  <div class="cards">
+    <a class="card" href="./mockup.html">
+      <div class="card-icon" style="background:#1C1917">📱</div>
+      <div class="card-body">
+        <div class="card-title">UI Mockup <span class="badge badge-new">EN · ES · PT</span></div>
+        <div class="card-desc">All 20 screens in mobile phone frames and 8 key screens in desktop browser frames. Language switcher (EN / ES / PT) and Mobile / Desktop view toggle.</div>
+        <div class="card-url">docs-drab-delta.vercel.app/mockup.html</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+    <a class="card" href="./pantallas.html">
+      <div class="card-icon" style="background:#A07850">🖼</div>
+      <div class="card-body">
+        <div class="card-title">Flow Diagram</div>
+        <div class="card-desc">4 flows · 20 screens with color-coded arrows showing every user action (landlord, tenant, arbitrator) and state transition.</div>
+        <div class="card-url">docs-drab-delta.vercel.app/pantallas.html</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+    <a class="card" href="./flujos.html">
+      <div class="card-icon" style="background:#F5F0E8;border:1.5px solid #E5DFD5">📊</div>
+      <div class="card-body">
+        <div class="card-title">State Machine Flows</div>
+        <div class="card-desc">High-level flow diagram of the escrow state machine: Created → Funded → DistributionProposed → Disputed / Completed.</div>
+        <div class="card-url">docs-drab-delta.vercel.app/flujos.html</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+  </div>
+
+  <div class="dv"></div>
+
+  <!-- Smart contract -->
+  <div class="sec-lbl">Smart Contract</div>
+  <div class="cards">
+    <a class="card" href="./GarantYa.md">
+      <div class="card-icon" style="background:#F5F0E8;border:1.5px solid #E5DFD5">📄</div>
+      <div class="card-body">
+        <div class="card-title">Solidity API Reference</div>
+        <div class="card-desc">Full NatSpec documentation for <code>GarantYa</code> (escrow) and <code>GarantYaFactory</code>. All functions, events, errors and state variables.</div>
+        <div class="card-url">GarantYa.md</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+  </div>
+
+  <div class="dv"></div>
+
+  <!-- State machine -->
+  <div class="sec-lbl">Contract States</div>
+  <div class="states">
+    <div class="state"><div class="state-name" style="color:#475569">Created</div><div class="state-desc">Contract deployed, awaiting tenant deposit.</div></div>
+    <div class="state"><div class="state-name" style="color:#166534">Funded</div><div class="state-desc">Deposit locked. Landlord can propose distribution.</div></div>
+    <div class="state"><div class="state-name" style="color:#92400E">DistributionProposed</div><div class="state-desc">Proposal sent. Tenant has 7 days to accept or reject.</div></div>
+    <div class="state"><div class="state-name" style="color:#991B1B">Disputed</div><div class="state-desc">Tenant rejected. Arbitrator has 30 days to resolve.</div></div>
+    <div class="state"><div class="state-name" style="color:#166534">Completed</div><div class="state-desc">Funds allocated. Both parties can withdraw.</div></div>
+    <div class="state"><div class="state-name" style="color:#475569">Cancelled</div><div class="state-desc">Contract cancelled before funding.</div></div>
+  </div>
+
+  <div class="ft">
+    Avalanche Fuji Testnet · GarantYa v7 · Open source
+  </div>
+
+</div>
+</body>
+</html>

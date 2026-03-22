@@ -116,6 +116,7 @@ export default function HomePage() {
   const [txHash,           setTxHash]           = useState<string | null>(null);
   const [contractAddress,  setContractAddress]  = useState<string | null>(null);
   const [isSubmitting,     setIsSubmitting]     = useState(false);
+  const [loadingStep,      setLoadingStep]      = useState<0 | 1 | 2 | 3>(0);
 
   const { data: feeBps } = useReadContract({
     address: FACTORY_ADDRESS,
@@ -163,6 +164,7 @@ export default function HomePage() {
   async function handleDeploy() {
     if (!validate() || isSubmitting) return;
     setIsSubmitting(true);
+    setLoadingStep(1);
     try {
       const hash = await writeContractAsync({
         address: FACTORY_ADDRESS,
@@ -171,9 +173,11 @@ export default function HomePage() {
         args: [landlord as Address, amountWei, BigInt(days)],
       });
       setTxHash(hash);
+      setLoadingStep(2);
 
       // Leer receipt para obtener la address del contrato nuevo
       const receipt = await publicClient!.waitForTransactionReceipt({ hash });
+      setLoadingStep(3);
       const createdLog = receipt.logs.find(log => {
         try {
           const decoded = decodeEventLog({ abi: GARANTYA_ABI, data: log.data, topics: log.topics });
@@ -200,6 +204,7 @@ export default function HomePage() {
       console.error("[GarantYa] Deploy error:", err);
       const msg = err instanceof Error ? err.message : "Unknown error";
       setErrors({ submit: msg.includes("rejected") ? t.home.errors.rejected : t.home.errors.createFailed });
+      setLoadingStep(0);
     } finally {
       setIsSubmitting(false);
     }
@@ -436,6 +441,24 @@ export default function HomePage() {
             <p className="text-xs text-red-600 bg-red-50 rounded-xl px-4 py-3 border border-red-100">
               {errors.submit}
             </p>
+          )}
+
+          {loadingStep > 0 && (
+            <div className="flex items-start gap-2.5">
+              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-[#1C1917] flex items-center justify-center mt-0.5">
+                <svg className="w-3.5 h-3.5 text-[#F5F0E8] animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              </div>
+              <div className="bg-[#F5F0E8] border border-[#E5DFD5] rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[calc(100%-2.5rem)]">
+                <p className="text-xs font-medium text-[#1C1917] leading-relaxed">
+                  {loadingStep === 1 && "Sending contract to blockchain — please confirm in your wallet…"}
+                  {loadingStep === 2 && "Waiting for block confirmation on Avalanche…"}
+                  {loadingStep === 3 && "Saving contract details…"}
+                </p>
+              </div>
+            </div>
           )}
 
           <Button fullWidth loading={isPending || isSubmitting} onClick={handleDeploy}>

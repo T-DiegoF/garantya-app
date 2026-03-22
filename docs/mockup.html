@@ -162,15 +162,9 @@ body{font-family:'Inter',sans-serif;background:#e2ddd6;color:#1C1917;-webkit-fon
     <button class="tab" onclick="setLang('es')">ES</button>
     <button class="tab" onclick="setLang('pt')">PT</button>
   </div>
-  <div class="hdr-sep"></div>
-  <div class="tab-group" id="view-tabs">
-    <button class="tab active" onclick="setView('mobile')">📱 Mobile</button>
-    <button class="tab" onclick="setView('desktop')">🖥 Desktop</button>
-  </div>
 </div>
 
 <div id="mobile-sec" class="vsec"></div>
-<div id="desktop-sec" class="vsec" style="display:none"></div>
 
 <script>
 // ─── Translations ────────────────────────────────────────────────────────────
@@ -1155,45 +1149,14 @@ function renderMobile(t) {
 `;
 }
 
-function renderDesktop(t) {
-  return `
-<div style="margin-bottom:32px">
-  <div style="font-size:28px;font-weight:900;letter-spacing:-.03em;margin-bottom:4px">GarantYa — Desktop Mockup</div>
-  <p style="font-size:13px;color:#78716C;margin-bottom:28px">8 key screens · 960px wide · Avalanche Fuji Testnet</p>
-</div>
-${D.d1(t)}
-${D.d2(t)}
-${D.d3(t)}
-${D.d4(t)}
-${D.d5(t)}
-${D.d6(t)}
-${D.d7(t)}
-${D.d8(t)}
-`;
-}
-
 function render() {
   const t = T[currentLang];
-  if (currentView === 'mobile') {
-    document.getElementById('mobile-sec').innerHTML = renderMobile(t);
-  } else {
-    document.getElementById('desktop-sec').innerHTML = renderDesktop(t);
-  }
+  document.getElementById('mobile-sec').innerHTML = renderMobile(t);
 }
 
 function setLang(lang) {
   currentLang = lang;
   document.querySelectorAll('#lang-tabs .tab').forEach(b => b.classList.toggle('active', b.textContent === lang.toUpperCase()));
-  render();
-}
-
-function setView(view) {
-  currentView = view;
-  document.getElementById('mobile-sec').style.display  = view === 'mobile'  ? '' : 'none';
-  document.getElementById('desktop-sec').style.display = view === 'desktop' ? '' : 'none';
-  document.querySelectorAll('#view-tabs .tab').forEach(b => {
-    b.classList.toggle('active', b.textContent.includes(view === 'mobile' ? 'Mobile' : 'Desktop'));
-  });
   render();
 }
 
