@@ -3,6 +3,8 @@
 **On-chain rental security deposit escrow on Avalanche.**
 
 https://garantya.vercel.app/
+https://docs-drab-delta.vercel.app/pantallas
+https://docs-drab-delta.vercel.app/flujos
 
 GarantYa replaces the traditional cash deposit with a smart contract. The tenant locks funds in a per-rental escrow; at the end of the tenancy the landlord proposes a distribution, and the tenant can accept, reject (triggering arbitration), or reclaim funds automatically if no proposal is made.
 
